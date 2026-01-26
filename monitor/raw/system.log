@@ -1,0 +1,5 @@
+2025-10-25 08:00:15 freebsd-srv kernel: Copyright (c) 1992-2025 The FreeBSD Project.
+2025-10-25 08:00:18 freebsd-srv kernel: CRITICAL event: da0: READ_DMA failure - Check cables.
+2025-10-25 12:30:05 freebsd-srv cron[1055]: (root) CMD (/usr/libexec/atrun)
+2025-10-26 09:15:00 freebsd-srv syslogd: kernel boot file is /boot/kernel/kernel
+INFO: User logged in from 192.168.1.15 via sshd[22]

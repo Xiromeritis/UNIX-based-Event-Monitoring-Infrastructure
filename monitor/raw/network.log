@@ -1,0 +1,5 @@
+2025-10-25 14:20:00 freebsd-srv sshd[8022]: Accepted publickey for admin from 192.168.1.20 port 55122 ssh2
+FAILED: Connection timed out to 10.0.0.5 during pkg update
+2025-10-26 03:00:11 freebsd-srv ipfw: 100 Deny TCP 192.168.1.20:5342 192.168.1.1:80 in via em0
+ERROR: Network unreachable: route to 8.8.8.8 is down via interface em0
+2025-10-26 15:45:22 freebsd-srv named[662]: client @0x802345678 192.168.1.45#4321: query: google.com IN A + (192.168.1.1)

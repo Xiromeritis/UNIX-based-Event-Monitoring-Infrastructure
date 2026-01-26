@@ -1,0 +1,5 @@
+2025-10-25 10:00:01 freebsd-srv su: admin to root on /dev/pts/0
+WARNING: Failed login attempt from 192.168.1.100 user=root
+CRITICAL: Firewall breach detected on port 22 (Brute Force)
+2025-10-26 18:20:55 freebsd-srv sudo: admin : TTY=pts/1 ; PWD=/home/admin ; USER=root ; COMMAND=/usr/sbin/service apache24 restart
+2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0: exited on signal 11 (core dumped)
