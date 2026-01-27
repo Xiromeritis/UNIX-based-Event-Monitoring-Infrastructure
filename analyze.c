@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         sumln++;    // Increment line counter
 
         // Increment "ERROR"-containing line counter
-        if (strstr(line, "ERROR") != NULL) {
+        if (strstr(ln, "ERROR") != NULL) {
             errln++;
         }
 
