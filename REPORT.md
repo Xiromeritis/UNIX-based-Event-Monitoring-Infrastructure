@@ -140,3 +140,29 @@ END {
 }' > monitor/reports/daily_summary.txt
 ```
 ![III-2](screenshots/III-2.png)
+
+## IV. Process Management
+1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep 2`](https://man.freebsd.org/cgi/man.cgi?sleep)) via a while loop in the `monitor/raw/timestamps.log` file with:
+```shell
+(while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
+```
+2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with `-e` argument (standing for "every"), to show every system process (user-independent) and with the `-f` argument (standing for "full format"), to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
+```shell
+ps -ef | grep sleep
+```
+![IV-2](screenshots/IV-2.png)
+3. Use of [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) to the process whose `PID = 931`, to change the process' priority (niceness) to 10 (lowest process) (sudo privileges required) with:
+```shell
+sudo renice -n 10 -p 931
+```
+![IV-3](screenshots/IV-3.png)
+4. Process termination with `-TERM` (`SIGTERM`) signal via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill) to the process whose `PID = 931` with:
+```shell
+kill -TERM 931
+```
+![IV-4](screenshots/IV-4.png)
+5. The process was found running with `PID = 931`. Initially, its priority was reduced with [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) and then the process was permanently terminated via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill). The `monitor/raw/timestamps.log` file confirms that logging stopped after the process was terminated.
+```shell
+cat monitor/raw/timestamps.log
+```
+![IV-5](screenshots/IV-5.png)
