@@ -142,7 +142,7 @@ END {
 ![III-2](screenshots/III-2.png)
 
 ## IV. Process Management
-1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep 2`](https://man.freebsd.org/cgi/man.cgi?sleep)) via a while loop in the `monitor/raw/timestamps.log` file with:
+1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) 2) via a while loop in the `monitor/raw/timestamps.log` file with:
 ```shell
 (while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
 ```
