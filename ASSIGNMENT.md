@@ -1,3 +1,4 @@
+![Harokopio Logo](https://www.hua.gr/wp-content/uploads/2024/07/HUA-Logo-Blue-RGB.png)
 # Harokopio University of Athens, Informatics and Telematics Department
 
 ## Operating Systems (3<sup>rd</sup> Semester)
