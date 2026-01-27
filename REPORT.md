@@ -80,8 +80,63 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ```shell
 ls -l monitor/raw/
 ```
-and [count](https://man.freebsd.org/cgi/man.cgi?query=wc) total lines in the 3 `.log` files with:
+and [count](https://man.freebsd.org/cgi/man.cgi?wc) total lines in the 3 `.log` files with:
 ```shell
 wc -l monitor/raw/*.log
 ```
 ![I-4](screenshots/I-4.png)
+
+## II. Filtering logs with Regular Expressions
+1. Use of [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) with extended regex (`-E`) to locate lines starting with YYYY-MM-DD pattern, lines containing "ERROR", "FAILED", "CRITICAL" & IPv4 address:
+```shell
+grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}|ERROR|FAILED|CRITICAL|([0-9]{1,3}\.){3}[0-9]{1,3}" monitor/raw/*.log
+```
+![II-1](screenshots/II-1.png)
+2. Redirect and overwrite (`>`) [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) result in `monitor/processed/alerts.raw`:
+```shell
+grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}|ERROR|FAILED|CRITICAL|([0-9]{1,3}\.){3}[0-9]{1,3}" monitor/raw/*.log > monitor/processed/alerts.raw
+```
+![II-2](screenshots/II-2.png)
+3. Remove duplicate lines with [`uniq`](https://man.freebsd.org/cgi/man.cgi?uniq) and [`sort`](https://man.freebsd.org/cgi/man.cgi?sort) them, creating the `monitor/processed/alerts.sorted` file with pipe (`|`) and redirect & overwrite (`>`):
+```shell
+sort monitor/processed/alerts.raw | uniq > monitor/processed/alerts.sorted
+```
+![II-3](screenshots/II-3.png)
+
+## III. Combining Pipes & Redirection to create a report
+1. [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) redirects `monitor/processed/alerts.sorted`'s contents via pipe (`|`) to [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) which is executed separately for each of the file's line, allowing us to define local variables (counters) and print the output:
+```shell
+cat monitor/processed/alerts.sorted | awk '{
+    # Increase total alert counter for every line read
+    count++; 
+
+    # If the line contains "ERROR", increase error counter
+    if ($0 ~ /ERROR/) error++; 
+
+    # If the line contains a local IP (192.168.*), increase ip counter
+    if ($0 ~ /192\.168\./) ip++; 
+} 
+END { 
+    # Print final summary
+    print "Total Alerts: " count ", Errors: " error ", Local Network Events: " ip 
+}'
+```
+![III-1](screenshots/III-1.png)
+2. Redirect and overwrite (`>`) the output of the [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) pipe (`|`) with [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) in the `monitor/reports/daily_summary.txt` file with:
+```shell
+cat monitor/processed/alerts.sorted | awk '{
+    # Increase total alert counter for every line read
+    count++; 
+
+    # If the line contains "ERROR", increase error counter
+    if ($0 ~ /ERROR/) error++; 
+
+    # If the line contains a local IP (192.168.*), increase ip counter
+    if ($0 ~ /192\.168\./) ip++; 
+} 
+END { 
+    # Print final summary
+    print "Total Alerts: " count ", Errors: " error ", Local Network Events: " ip 
+}' > monitor/reports/daily_summary.txt
+```
+![III-2](screenshots/III-2.png)
