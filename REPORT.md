@@ -76,15 +76,17 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ```
 ![I-3](screenshots/I-3.png)
 
-4. Display a detailed [list](https://man.freebsd.org/cgi/man.cgi?ls) with:
+4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" argument (`-l`):
 ```shell
 ls -l monitor/raw/
 ```
-and [count](https://man.freebsd.org/cgi/man.cgi?wc) total lines in the 3 `.log` files with:
+and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" argument (`-l`) to count total lines in the 3 `.log` files:
 ```shell
 wc -l monitor/raw/*.log
 ```
 ![I-4](screenshots/I-4.png)
+
+---
 
 ## II. Filtering logs with Regular Expressions
 1. Use of [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) with extended regex (`-E`) to locate lines starting with YYYY-MM-DD pattern, lines containing "ERROR", "FAILED", "CRITICAL" & IPv4 address:
@@ -102,6 +104,8 @@ grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}|ERROR|FAILED|CRITICAL|([0-9]{1,3}\.){3}[0-9
 sort monitor/processed/alerts.raw | uniq > monitor/processed/alerts.sorted
 ```
 ![II-3](screenshots/II-3.png)
+
+---
 
 ## III. Combining Pipes & Redirection to create a report
 1. [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) redirects `monitor/processed/alerts.sorted`'s contents via pipe (`|`) to [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) which is executed separately for each of the file's line, allowing us to define local variables (counters) and print the output:
@@ -141,6 +145,8 @@ END {
 ```
 ![III-2](screenshots/III-2.png)
 
+---
+
 ## IV. Process Management
 1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) 2) via a while loop in the `monitor/raw/timestamps.log` file with:
 ```shell
@@ -156,7 +162,7 @@ ps -ef | grep sleep
 sudo renice -n 10 -p 931
 ```
 ![IV-3](screenshots/IV-3.png)
-4. Process termination with `-TERM` (`SIGTERM`) signal via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill) to the process whose `PID = 931` with:
+4. Process termination with `-TERM` (`SIGTERM`) [signal](https://man.freebsd.org/cgi/man.cgi?query=signal) via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill) to the process whose `PID = 931` with:
 ```shell
 kill -TERM 931
 ```
@@ -166,3 +172,7 @@ kill -TERM 931
 cat monitor/raw/timestamps.log
 ```
 ![IV-5](screenshots/IV-5.png)
+
+---
+
+##
