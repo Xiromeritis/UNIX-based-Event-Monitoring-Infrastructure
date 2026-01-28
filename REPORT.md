@@ -76,11 +76,11 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ```
 ![I-3](screenshots/I-3.png)
 
-4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" argument (`-l`):
+4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag (`-l`):
 ```shell
 ls -l monitor/raw/
 ```
-and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" argument (`-l`) to count total lines in the 3 `.log` files:
+and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag (`-l`) to count total lines in the 3 `.log` files:
 ```shell
 wc -l monitor/raw/*.log
 ```
@@ -152,7 +152,7 @@ END {
 ```shell
 (while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
 ```
-2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with `-e` argument (standing for "every"), to show every system process (user-independent) and with the `-f` argument (standing for "full format"), to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
+2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with `-e` flag (standing for "every"), to show every system process (user-independent) and with the `-f` flag (standing for "full format"), to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
 ```shell
 ps -ef | grep sleep
 ```
