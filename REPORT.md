@@ -76,11 +76,11 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ```
 ![I-3](screenshots/I-3.png)
 
-4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag (`-l`):
+4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag `-l`:
 ```shell
 ls -l monitor/raw/
 ```
-and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag (`-l`) to count total lines in the 3 `.log` files:
+and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag `-l` to count total lines in the 3 `.log` files:
 ```shell
 wc -l monitor/raw/*.log
 ```
@@ -152,7 +152,7 @@ END {
 ```shell
 (while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
 ```
-2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with `-e` flag (standing for "every"), to show every system process (user-independent) and with the `-f` flag (standing for "full format"), to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
+2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with the "every" flag `-e`, to show every system process (user-independent) and with the "full format" flag `-f`, to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
 ```shell
 ps -ef | grep sleep
 ```
@@ -172,6 +172,98 @@ kill -TERM 931
 cat monitor/raw/timestamps.log
 ```
 ![IV-5](screenshots/IV-5.png)
+
+---
+
+## V. Implementing a C program for analyzing logs
+1. Receive `.log` file's name as an argument and check if not received.
+```c
+int main(int argc, char *argv[]) {
+    // Check if filename argument is provided
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        return 1;   // Error opening -> exit code 1
+    }
+}
+```
+2. Attempt to [`open()`](https://man.freebsd.org/cgi/man.cgi?open) the file via system call with the "open for reading only" flag O_RDONLY and returning [`open()`](https://man.freebsd.org/cgi/man.cgi?open)'s value to an integer holding the file descriptor's ID.
+```c
+// Open file using system call (with reading only flag)
+int fd = open(argv[1], O_RDONLY);   // File descriptor
+```
+3. If [`open()`](https://man.freebsd.org/cgi/man.cgi?open) returns `-1`, the file failed to open and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) is used to print error message.
+```c
+// Check for open() error
+if (fd == -1) {
+    perror("Error opening file");
+    return 1;   // Error opening -> exit code 1
+}
+```
+4. If the file opens, [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) reads, inside an infinite loop, each of the `fp`'s (file pointer's) line until it returns `-1`, meaning end of file (`EOF`). The variables that are defined are:
+- total lines read from the use of [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) counter
+- "ERROR" string-containing lines from the use of [`strstr()`](https://man.freebsd.org/cgi/man.cgi?strstr) counter
+- digit-containing lines from the use of [`isdigit`](https://man.freebsd.org/cgi/man.cgi?isdigit) in a loop counter
+```c
+char *ln = NULL;    // Line's text
+size_t len = 0;     // Buffer allocation size
+ssize_t read;       // Characters read counter
+
+int sumln = 0;  // Lines read counter
+int errln = 0;  // "ERROR"-containing lines counter
+int noln = 0;   // Digit-containing lines counter
+
+// Read file line-by-line
+while ((read = getline(&ln, &len, fp)) != -1) {
+    sumln++;    // Increment line counter
+
+    // Increment "ERROR"-containing line counter
+    if (strstr(ln, "ERROR") != NULL) {
+        errln++;
+    }
+
+    // Increment digit-containing line counter
+    for (int i = 0; i < read; i++) {
+        if (isdigit(ln[i])) {
+            noln++;
+            break;  // Stop checking the line if a number is found
+        }
+    }
+}
+```
+5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`, else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` and exit code `2` if file is empty.
+```c
+       // Check if filename argument is provided
+if (argc != 2) {
+    fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+    return 1;   // Error opening -> exit code 1
+}
+       
+       // Check for open() error
+if (fd == -1) {
+    perror("Error opening file");
+    return 1;   // Error opening -> exit code 1
+}
+       
+       // Convert file descriptor to stream for getline() with read permission
+FILE *fp = fdopen(fd, "r");     // File pointer
+if (fp == NULL) {
+    perror("Error converting file descriptor");
+    close(fd);  // Close file
+    return 1;   // Error converting -> exit code 1
+}
+       
+       // Empty file -> exit code 2
+if (sumln == 0) {
+    return 2;
+}
+
+return 0;   // Success -> exit code 0
+```
+
+Finally, with the use of [`gcc`](https://gcc.gnu.org/) and the output flag `-o`, we compile `analyze.c` into the executable `analyze_log` with:
+```shell
+gcc analyze.c -o analyze_log
+```
 
 ---
 
