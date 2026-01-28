@@ -232,19 +232,19 @@ while ((read = getline(&ln, &len, fp)) != -1) {
 ```
 5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`, else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` and exit code `2` if file is empty.
 ```c
-       // Check if filename argument is provided
+// Check if filename argument is provided
 if (argc != 2) {
     fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
     return 1;   // Error opening -> exit code 1
 }
        
-       // Check for open() error
+// Check for open() error
 if (fd == -1) {
     perror("Error opening file");
     return 1;   // Error opening -> exit code 1
 }
        
-       // Convert file descriptor to stream for getline() with read permission
+// Convert file descriptor to stream for getline() with read permission
 FILE *fp = fdopen(fd, "r");     // File pointer
 if (fp == NULL) {
     perror("Error converting file descriptor");
@@ -252,7 +252,7 @@ if (fp == NULL) {
     return 1;   // Error converting -> exit code 1
 }
        
-       // Empty file -> exit code 2
+// Empty file -> exit code 2
 if (sumln == 0) {
     return 2;
 }
