@@ -267,4 +267,63 @@ gcc analyze.c -o analyze_log
 
 ---
 
-##
+## VI. Shell Script that automates the entire system
+1. Pass a logs' directory as an argument:
+```shell
+# Assign first argument to variable
+LOG_D=$1
+```
+2. Check if an argument was passed (positional parameters) by checking if total arguments number `$#` is not equal `-ne` to `1`. If `true`, then print an [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
+```shell
+# Check if more than one argument is being passed
+if [ "$#" -ne 1 ]; then
+    echo -e "${YELLOW}USAGE: $0 /path/to/logs/${NC}"
+    exit 1
+fi
+```
+3. Check if the passed `LOG_D` argument is NOT `!` a directory `-d` (therefore, checking if it also exists) and if `true` then [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
+```shell
+# Check if path exists & is NOT a directory
+if [ ! -d "$LOG_D" ]; then
+    echo -e "${RED}ERROR: Directory '$LOG_D' does not exist.${NC}"
+    exit 1
+fi
+```
+4. Display with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the name of the script `$0` and the total number of arguments `$#`:
+```shell
+# Script info
+echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}"
+```
+5. Check if the executable exists and is executable with `-x`, then call the `ANALYZER_EXEC="./analyze_log"` program for each file in the directory as a `file` argument. Else, if the executable is missing, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
+```shell
+ANALYZER_EXEC="./analyze_log"
+
+        # Check if executable exists and is executable
+        if [ -x "$ANALYZER_EXEC" ]; then
+            # Run executable w/ the file as argument & append its output to report file
+            "$ANALYZER_EXEC" "$file" >> "$RPT_F"
+        else
+            # Exit if executable missing
+            echo -e "${RED}ERROR: '$ANALYZER_EXEC' not found!${NC}"
+            exit 1
+        fi
+```
+6. Define a report file variable `RPT_F` holding the string value of its path `monitor/reports/full_report.txt`. Then, initialize/overwrite (`>`) the file with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing a header. After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `RPT_F`. Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `filename` of the `file` and append (`>>`) it to the report file `RPT_F`. And finally, run the `ANALYZER_EXEC="./analyze_log"` executable with the `file` argument and append (`>>`) its output (`stdout`) to the report file `RPT_F`. A full report will be available in `monitor/reports/full_report.txt`.
+```shell
+# Report file path
+RPT_F="monitor/reports/full_report.txt"
+
+# Initialize (overwrite) report file
+echo "--- SYSTEM MONITOR FULL REPORT ---" > "$RPT_F"
+echo "Run @ $(date)" >> "$RPT_F"
+echo "----------------------------------" >> "$RPT_F"
+
+# Append separator and file header to report
+echo "" >> "$RPT_F"
+echo "=== $CATEGORY: $filename ===" >> "$RPT_F"   
+
+# Run executable w/ the file as argument & append its output to report file
+"$ANALYZER_EXEC" "$file" >> "$RPT_F" 
+```
+
+*Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>.*

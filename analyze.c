@@ -64,5 +64,9 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
+    // Print statistics
+    printf("File: %s | Lines: %d | Errors: %d | Numeric Lines: %d", argv[1], sumln, errln, noln);
+    printf("\n");
+
     return 0;   // Success -> exit code 0
 }
