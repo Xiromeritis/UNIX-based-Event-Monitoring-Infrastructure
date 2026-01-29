@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
         return 1;   // Error opening -> exit code 1
     }
 
-    // Open file using system call (with reading only flag)
+    // Open file using system call (w/ reading only flag)
     int fd = open(argv[1], O_RDONLY);   // File descriptor
 
     // Check for open() error
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         return 1;   // Error opening -> exit code 1
     }
 
-    // Convert file descriptor to stream for getline() with read permission
+    // Convert file descriptor to stream for getline() w/ read permission
     FILE *fp = fdopen(fd, "r");     // File pointer
     if (fp == NULL) {
         perror("Error converting file descriptor");
