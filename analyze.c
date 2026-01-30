@@ -6,10 +6,15 @@
 #include <errno.h>  // errno library
 #include <ctype.h>  // isdigit() library
 
+// Colors
+#define RED     "\033[0;31m"
+#define YELLOW  "\033[1;33m"
+#define NC   "\033[0m"   // No color (reset)
+
 int main(int argc, char *argv[]) {
     // Check if filename argument is provided
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        fprintf(stderr, "%sUsage: %s <filename>%s\n", YELLOW, argv[0], NC);
         return 1;   // Error opening -> exit code 1
     }
 
@@ -18,14 +23,14 @@ int main(int argc, char *argv[]) {
 
     // Check for open() error
     if (fd == -1) {
-        perror("Error opening file");
+        perror(RED "Error opening file");
         return 1;   // Error opening -> exit code 1
     }
 
     // Convert file descriptor to stream for getline() w/ read permission
     FILE *fp = fdopen(fd, "r");     // File pointer
     if (fp == NULL) {
-        perror("Error converting file descriptor");
+        perror(RED "Error converting file descriptor");
         close(fd);  // Close file
         return 1;   // Error converting -> exit code 1
     }
@@ -61,6 +66,7 @@ int main(int argc, char *argv[]) {
 
     // Empty file -> exit code 2
     if (sumln == 0) {
+        fprintf(stderr, "%sEmpty file warning: %s%s\n", YELLOW, argv[1], NC);
         return 2;
     }
 

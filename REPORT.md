@@ -181,11 +181,12 @@ cat monitor/raw/timestamps.log
 int main(int argc, char *argv[]) {
     // Check if filename argument is provided
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        fprintf(stderr, "%sUsage: %s <filename>%s\n", YELLOW, argv[0], NC);
         return 1;   // Error opening -> exit code 1
     }
 }
 ```
+![V-1](screenshots/V-1.png)
 2. Attempt to [`open()`](https://man.freebsd.org/cgi/man.cgi?open) the file via system call with the "open for reading only" flag O_RDONLY and returning [`open()`](https://man.freebsd.org/cgi/man.cgi?open)'s value to an integer holding the file descriptor's ID.
 ```c
 // Open file using system call (with reading only flag)
@@ -195,10 +196,11 @@ int fd = open(argv[1], O_RDONLY);   // File descriptor
 ```c
 // Check for open() error
 if (fd == -1) {
-    perror("Error opening file");
+    perror(RED "Error opening file");
     return 1;   // Error opening -> exit code 1
 }
 ```
+![V-3](screenshots/V-3.png)
 4. If the file opens, [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) reads, inside an infinite loop, each of the `fp`'s (file pointer's) line until it returns `-1`, meaning the end of file (`EOF`). The variables that are defined are:
 - total lines read from the use of [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) counter
 - "ERROR" string-containing lines from the use of [`strstr()`](https://man.freebsd.org/cgi/man.cgi?strstr) counter
@@ -230,40 +232,53 @@ while ((read = getline(&ln, &len, fp)) != -1) {
     }
 }
 ```
-5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`, else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` and exit code `2` if a file is empty.
+5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`:
 ```c
-// Check if filename argument is provided
-if (argc != 2) {
-    fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
-    return 1;   // Error opening -> exit code 1
-}
-       
-// Check for open() error
-if (fd == -1) {
-    perror("Error opening file");
-    return 1;   // Error opening -> exit code 1
-}
-       
-// Convert file descriptor to stream for getline() with read permission
-FILE *fp = fdopen(fd, "r");     // File pointer
-if (fp == NULL) {
-    perror("Error converting file descriptor");
-    close(fd);  // Close file
-    return 1;   // Error converting -> exit code 1
-}
-       
-// Empty file -> exit code 2
-if (sumln == 0) {
-    return 2;
-}
+// Print statistics
+printf("File: %s | Lines: %d | Errors: %d | Numeric Lines: %d\n", argv[1], sumln, errln, noln);
 
 return 0;   // Success -> exit code 0
 ```
+![V-5a](screenshots/V-5a.png)
+Else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` :
+```c
+// Check if filename argument is provided
+if (argc != 2) {
+    fprintf(stderr, "%sUsage: %s <filename>%s\n", YELLOW, argv[0], NC);
+    return 1;   // Error opening -> exit code 1
+}
+
+// Check for open() error
+if (fd == -1) {
+    perror(RED "Error opening file");
+    return 1;   // Error opening -> exit code 1
+}
+       
+// Convert file descriptor to stream for getline() w/ read permission
+FILE *fp = fdopen(fd, "r");     // File pointer
+if (fp == NULL) {
+    perror(RED "Error converting file descriptor");
+    close(fd);  // Close file
+    return 1;   // Error converting -> exit code 1
+}
+```
+and exit code `2` if a file is empty:
+```c 
+// Empty file -> exit code 2
+if (sumln == 0) {
+    fprintf(stderr, "%sEmpty file warning: %s%s\n", YELLOW, argv[1], NC);
+    return 2;
+}
+```
+![V-5c](screenshots/V-5c.png)
 
 Finally, with the use of [`gcc`](https://gcc.gnu.org/) and the output flag `-o`, we compile `analyze.c` into the executable `analyze_log` with:
 ```shell
 gcc analyze.c -o analyze_log
 ```
+![V](screenshots/V.png)
+
+*Note: <span style="color:red"> *Colored strings*</span> have been added to error outputs.*
 
 ---
 
@@ -404,6 +419,15 @@ case "$filename" in
         COLOR=$YELLOW
         ;;
 esac
+```
+- `while` loop for iterative execution that when `true` (always `true` until interrupted with the "signal interrupted" `SIGINT` signal (^C)) it executes the script's main code (with [`do`](https://man.freebsd.org/cgi/man.cgi?do)) and after it's finished it waits for `60` seconds to run again ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) `60`):
+```shell
+# Start infinite loop (iterative execution)
+while true; do
+    # Main script code
+    # Pause script for 60" before starting next loop
+    sleep 60
+done
 ```
 
 *Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>.*

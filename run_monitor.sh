@@ -120,5 +120,4 @@ while true; do
 
     # Pause script for 60" before starting next loop
     sleep 60
-
 done
