@@ -5,11 +5,11 @@
 
 ---
 
-## Operating Systems Lab Project - Analyzing and Processing System Events in UNIX Environment
+## Operating Systems Lab Project – Analyzing and Processing System Events in UNIX Environment
 
 ---
 
-## I.  Environment Preparation & Basic Commands
+## I. Environment Preparation & Basic Commands
 1. `monitor` directory with `/raw`, `/processed` & `/reports` subdirectories creation:
 ```shell
 mkdir -p monitor/{raw,processed,reports}
@@ -108,7 +108,7 @@ sort monitor/processed/alerts.raw | uniq > monitor/processed/alerts.sorted
 ---
 
 ## III. Combining Pipes & Redirection to create a report
-1. [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) redirects `monitor/processed/alerts.sorted`'s contents via pipe (`|`) to [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) which is executed separately for each of the file's line, allowing us to define local variables (counters) and print the output:
+1. [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) redirects `monitor/processed/alerts.sorted`'s contents via pipe (`|`) to [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) which is executed separately for each of the file's lines, allowing us to define local variables (counters) and print the output:
 ```shell
 cat monitor/processed/alerts.sorted | awk '{
     # Increase total alert counter for every line read
@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
 // Open file using system call (with reading only flag)
 int fd = open(argv[1], O_RDONLY);   // File descriptor
 ```
-3. If [`open()`](https://man.freebsd.org/cgi/man.cgi?open) returns `-1`, the file failed to open and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) is used to print error message.
+3. If [`open()`](https://man.freebsd.org/cgi/man.cgi?open) returns `-1`, the file failed to open and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) is used to print an error message.
 ```c
 // Check for open() error
 if (fd == -1) {
@@ -199,7 +199,7 @@ if (fd == -1) {
     return 1;   // Error opening -> exit code 1
 }
 ```
-4. If the file opens, [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) reads, inside an infinite loop, each of the `fp`'s (file pointer's) line until it returns `-1`, meaning end of file (`EOF`). The variables that are defined are:
+4. If the file opens, [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) reads, inside an infinite loop, each of the `fp`'s (file pointer's) line until it returns `-1`, meaning the end of file (`EOF`). The variables that are defined are:
 - total lines read from the use of [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) counter
 - "ERROR" string-containing lines from the use of [`strstr()`](https://man.freebsd.org/cgi/man.cgi?strstr) counter
 - digit-containing lines from the use of [`isdigit`](https://man.freebsd.org/cgi/man.cgi?isdigit) in a loop counter
@@ -230,7 +230,7 @@ while ((read = getline(&ln, &len, fp)) != -1) {
     }
 }
 ```
-5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`, else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` and exit code `2` if file is empty.
+5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0`, else if an opening file error exists, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `1` and exit code `2` if a file is empty.
 ```c
 // Check if filename argument is provided
 if (argc != 2) {
@@ -308,22 +308,102 @@ ANALYZER_EXEC="./analyze_log"
             exit 1
         fi
 ```
-6. Define a report file variable `RPT_F` holding the string value of its path `monitor/reports/full_report.txt`. Then, initialize/overwrite (`>`) the file with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing a header. After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `RPT_F`. Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `filename` of the `file` and append (`>>`) it to the report file `RPT_F`. And finally, run the `ANALYZER_EXEC="./analyze_log"` executable with the `file` argument and append (`>>`) its output (`stdout`) to the report file `RPT_F`. A full report will be available in `monitor/reports/full_report.txt`.
+6. Define a report file variable `RPT_F` holding the string value of its path `monitor/reports/full_report.txt`.
 ```shell
 # Report file path
 RPT_F="monitor/reports/full_report.txt"
-
+```
+Then, initialize/overwrite (`>`) the file with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing a header.
+```shell
 # Initialize (overwrite) report file
-echo "--- SYSTEM MONITOR FULL REPORT ---" > "$RPT_F"
+echo "----- SYSTEM MONITOR FULL REPORT -----" > "$RPT_F"
+```
+After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `RPT_F`.
+```shell
 echo "Run @ $(date)" >> "$RPT_F"
-echo "----------------------------------" >> "$RPT_F"
-
+echo "--------------------------------------" >> "$RPT_F"
+```
+Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `filename` of the `file` and append (`>>`) it to the report file `RPT_F`.
+```shell
 # Append separator and file header to report
 echo "" >> "$RPT_F"
-echo "=== $CATEGORY: $filename ===" >> "$RPT_F"   
-
+echo "=== $CATEGORY: $filename ===" >> "$RPT_F"
+```
+And finally, run the `ANALYZER_EXEC="./analyze_log"` executable with the `file` argument and append (`>>`) its output ([`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout)) to the report file `RPT_F`.
+```shell
 # Run executable w/ the file as argument & append its output to report file
 "$ANALYZER_EXEC" "$file" >> "$RPT_F" 
+```
+However, if the `ANALYZER_EXEC="./analyze_log"` executable's `EXIT_CODE` is not equal `-ne` to `0` then we append (`>>`) each case's error to the report file `RPT_F`:
+```shell
+# Store exit code
+EXIT_CODE=$?
+
+# Check if executable failed or had warnings
+if [ $EXIT_CODE -ne 0 ]; then
+    # Exit code cases
+fi
+```
+- If `EXIT_CODE` is equal `-eq` to 1 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` failed to open.
+```shell
+# Exit code 1 -> Error opening
+if [ $EXIT_CODE -eq 1 ]; then
+    echo "   [X] ERROR: Cannot open file." >> "$RPT_F"
+    echo -e "${RED}   -> Cannot open file (Exit code 1)${NC}"
+```
+- If `EXIT_CODE` is equal `-eq` to 2 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` is empty.
+```shell
+# Exit code 2 -> Empty file
+elif [ $EXIT_CODE -eq 2 ]; then
+      echo "   [!] NOTE: File is empty." >> "$RPT_F"
+      echo -e "${YELLOW}   -> File was empty (Exit code 2)${NC}"
+```
+- Else, append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` had an unknown exit code.
+```shell
+# Unknown exit code
+else
+      echo "   [X] ERROR: Analysis failed." >> "$RPT_F"
+      echo -e "${RED}   -> Analysis failed (Unknown exit code $EXIT_CODE)${NC}"
+fi
+```
+
+A full report will be available in `monitor/reports/full_report.txt`.
+
+*Note: The `ANALYZER_EXEC="./analyze_log"` executable's errors from [`fprint()`](https://man.freebsd.org/cgi/man.cgi?fprintf) and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) aren't being appended (`>>`) to the report file `RPT_F`, because only [`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout) is being appended (`>>`).*
+
+7. Usage of:
+- [`for`](https://man.freebsd.org/cgi/man.cgi?for) (loop) every `file` in the `LOG_D` directory [`find()`](https://man.freebsd.org/cgi/man.cgi?find) all files that their `-name` contains "`.log`":
+```shell
+# Use 'find' to get all .log files and loop through them one by one
+for file in $(find "$LOG_D" -name "*.log"); do
+  # Categorization and executable
+done
+```
+- Defining a `filename` variable holding just the [`basename`](https://man.freebsd.org/cgi/man.cgi?basename) of the `file` value (for ease) and then using [`case`](https://man.freebsd.org/cgi/man.cgi?case) (for categorization) to assign a string `CATEGORY` and a string `COLOR` (only used for [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing) depending on the `filename`.
+If `filename="system.log"` then `CATEGORY="[SYSTEM EVENT]"`, if `filename="network.log"` then `CATEGORY="[NETWORK TRAFFIC]"`, `filename="security.log"` then `CATEGORY="[SECURITY ALERT]"`, else `filename="*.log"` then `CATEGORY="[UNKNOWN LOG TYPE]"`:
+```shell
+# Extract filename from full path
+filename=$(basename "$file")
+
+# Check filename pattern to assign category label and add color
+case "$filename" in
+    system.log)
+        CATEGORY="[SYSTEM EVENT]"
+        COLOR=$NC
+        ;;
+    network.log)
+        CATEGORY="[NETWORK TRAFFIC]"
+        COLOR=$NC
+        ;;
+    security.log)
+        CATEGORY="[SECURITY ALERT]"
+        COLOR=$RED
+        ;;
+    *)
+        CATEGORY="[UNKNOWN LOG TYPE]" # Default case
+        COLOR=$YELLOW
+        ;;
+esac
 ```
 
 *Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>.*

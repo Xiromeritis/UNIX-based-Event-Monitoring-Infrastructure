@@ -37,9 +37,9 @@ while true; do
     echo "[$(date)] Running analysis cycle..."
 
     # Initialize (overwrite) report file
-    echo "--- SYSTEM MONITOR FULL REPORT ---" > "$RPT_F"
+    echo "----- SYSTEM MONITOR FULL REPORT -----" > "$RPT_F"
     echo "Run @ $(date)" >> "$RPT_F"
-    echo "----------------------------------" >> "$RPT_F"
+    echo "--------------------------------------" >> "$RPT_F"
 
     # Save current IFS for later restoration
     OLD_IFS=$IFS
@@ -54,23 +54,23 @@ while true; do
 
         # Check filename pattern to assign category label and add color
         case "$filename" in
-                    system.log)
-                        CATEGORY="[SYSTEM EVENT]"
-                        COLOR=$NC
-                        ;;
-                    network.log)
-                        CATEGORY="[NETWORK TRAFFIC]"
-                        COLOR=$NC
-                        ;;
-                    security.log)
-                        CATEGORY="[SECURITY ALERT]"
-                        COLOR=$RED
-                        ;;
-                    *)
-                        CATEGORY="[UNKNOWN LOG TYPE]" # Default case
-                        COLOR=$YELLOW
-                        ;;
-                esac
+            system.log)
+                CATEGORY="[SYSTEM EVENT]"
+                COLOR=$NC
+                ;;
+            network.log)
+                CATEGORY="[NETWORK TRAFFIC]"
+                COLOR=$NC
+                ;;
+            security.log)
+                CATEGORY="[SECURITY ALERT]"
+                COLOR=$RED
+                ;;
+            *)
+                CATEGORY="[UNKNOWN LOG TYPE]" # Default case
+                COLOR=$YELLOW
+                ;;
+        esac
 
         # Inform user about file's category
         echo -e "${COLOR}Analyzing: '$CATEGORY' '$filename'...${NC}"
@@ -85,8 +85,28 @@ while true; do
         if [ -x "$ANALYZER_EXEC" ]; then
             # Run executable w/ the file as argument & append its output to report file
             "$ANALYZER_EXEC" "$file" >> "$RPT_F"
+
+            # Store exit code
+            EXIT_CODE=$?
+
+            # Check if executable failed or had warnings
+            if [ $EXIT_CODE -ne 0 ]; then
+                # Exit code 1 -> Error opening
+                if [ $EXIT_CODE -eq 1 ]; then
+                    echo "   [X] ERROR: Cannot open file." >> "$RPT_F"
+                    echo -e "${RED}   -> Cannot open file (Exit code 1)${NC}"
+                # Exit code 2 -> Empty file
+                elif [ $EXIT_CODE -eq 2 ]; then
+                    echo "   [!] NOTE: File is empty." >> "$RPT_F"
+                    echo -e "${YELLOW}   -> File was empty (Exit code 2)${NC}"
+                # Unknown exit code
+                else
+                    echo "   [X] ERROR: Analysis failed." >> "$RPT_F"
+                    echo -e "${RED}   -> Analysis failed (Unknown exit code $EXIT_CODE)${NC}"
+                fi
+            fi
         else
-            # Exit if executable missing
+            # Exit if executable missing (aborts script)
             echo -e "${RED}ERROR: '$ANALYZER_EXEC' not found!${NC}"
             exit 1
         fi
