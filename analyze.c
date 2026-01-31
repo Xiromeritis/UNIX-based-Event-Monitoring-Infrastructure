@@ -39,9 +39,9 @@ int main(int argc, char *argv[]) {
     size_t len = 0;     // Buffer allocation size
     ssize_t read;       // Characters read counter
 
-    int sumln = 0;  // Lines read counter
-    int errln = 0;  // "ERROR"-containing lines counter
-    int noln = 0;   // Digit-containing lines counter
+    size_t sumln = 0;  // Lines read counter
+    size_t errln = 0;  // "ERROR"-containing lines counter
+    size_t noln = 0;   // Digit-containing lines counter
 
     // Read file line-by-line
     while ((read = getline(&ln, &len, fp)) != -1) {
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Print statistics
-    printf("File: %s | Lines: %d | Errors: %d | Numeric Lines: %d\n", argv[1], sumln, errln, noln);
+    printf("File: %s | Lines: %zu | Errors: %zu | Numeric Lines: %zu\n", argv[1], sumln, errln, noln);
 
     return 0;   // Success -> exit code 0
 }
