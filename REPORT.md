@@ -11,13 +11,13 @@
 
 ## I. Environment Preparation & Basic Commands
 1. `monitor` directory with `/raw`, `/processed` & `/reports` subdirectories creation:
-```shell
+```bash
 mkdir -p monitor/{raw,processed,reports}
 ```
 ![I-1](screenshots/I-1.png)
 
 2. `system.log`, `network.log` & `security.log` files creation in the `/monitor/raw` directory:
-```shell
+```bash
 touch monitor/raw/system.log monitor/raw/network.log monitor/raw/security.log
 ```
 ![I-2](screenshots/I-2.png)
@@ -47,7 +47,7 @@ For `monitor/raw/system.log`:
 "2025-10-26 18:20:55 freebsd-srv sudo: admin : TTY=pts/1 ; PWD=/home/admin ; USER=root ; COMMAND=/usr/sbin/service apache24 restart"
 "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0: exited on signal 11 (core dumped)”
 ```
-```shell
+```bash
 (
 echo "2025-10-25 08:00:15 freebsd-srv kernel: Copyright (c) 1992-2025 The FreeBSD Project."
 echo "2025-10-25 08:00:18 freebsd-srv kernel: CRITICAL event: da0: READ_DMA failure - Check cables."
@@ -56,7 +56,7 @@ echo "2025-10-26 09:15:00 freebsd-srv syslogd: kernel boot file is /boot/kernel/
 echo "INFO: User logged in from 192.168.1.15 via sshd[22]"
 ) >> monitor/raw/system.log
 ```
-```shell
+```bash
 (
 echo "2025-10-25 14:20:00 freebsd-srv sshd[8022]: Accepted publickey for admin from 192.168.1.20 port 55122 ssh2"
 echo "FAILED: Connection timed out to 10.0.0.5 during pkg update"
@@ -65,7 +65,7 @@ echo "ERROR: Network unreachable: route to 8.8.8.8 is down via interface em0"
 echo "2025-10-26 15:45:22 freebsd-srv named[662]: client @0x802345678 192.168.1.45#4321: query: google.com IN A + (192.168.1.1)"
 ) >> monitor/raw/network.log
 ```
-```shell
+```bash
 (
 echo "2025-10-25 10:00:01 freebsd-srv su: admin to root on /dev/pts/0"
 echo "WARNING: Failed login attempt from 192.168.1.100 user=root"
@@ -77,11 +77,11 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ![I-3](screenshots/I-3.png)
 
 4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag `-l`:
-```shell
+```bash
 ls -l monitor/raw/
 ```
 and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag `-l` to count total lines in the 3 `.log` files:
-```shell
+```bash
 wc -l monitor/raw/*.log
 ```
 ![I-4](screenshots/I-4.png)
@@ -90,17 +90,17 @@ wc -l monitor/raw/*.log
 
 ## II. Filtering logs with Regular Expressions
 1. Use of [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) with extended regex (`-E`) to locate lines starting with YYYY-MM-DD pattern, lines containing "ERROR", "FAILED", "CRITICAL" & IPv4 address:
-```shell
+```bash
 grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}|ERROR|FAILED|CRITICAL|([0-9]{1,3}\.){3}[0-9]{1,3}" monitor/raw/*.log
 ```
 ![II-1](screenshots/II-1.png)
 2. Redirect and overwrite (`>`) [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) result in `monitor/processed/alerts.raw`:
-```shell
+```bash
 grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}|ERROR|FAILED|CRITICAL|([0-9]{1,3}\.){3}[0-9]{1,3}" monitor/raw/*.log > monitor/processed/alerts.raw
 ```
 ![II-2](screenshots/II-2.png)
 3. Remove duplicate lines with [`uniq`](https://man.freebsd.org/cgi/man.cgi?uniq) and [`sort`](https://man.freebsd.org/cgi/man.cgi?sort) them, creating the `monitor/processed/alerts.sorted` file with pipe (`|`) and redirect & overwrite (`>`):
-```shell
+```bash
 sort monitor/processed/alerts.raw | uniq > monitor/processed/alerts.sorted
 ```
 ![II-3](screenshots/II-3.png)
@@ -109,7 +109,7 @@ sort monitor/processed/alerts.raw | uniq > monitor/processed/alerts.sorted
 
 ## III. Combining Pipes & Redirection to create a report
 1. [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) redirects `monitor/processed/alerts.sorted`'s contents via pipe (`|`) to [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) which is executed separately for each of the file's lines, allowing us to define local variables (counters) and print the output:
-```shell
+```bash
 cat monitor/processed/alerts.sorted | awk '{
     # Increase total alert counter for every line read
     count++; 
@@ -127,7 +127,7 @@ END {
 ```
 ![III-1](screenshots/III-1.png)
 2. Redirect and overwrite (`>`) the output of the [`cat`](https://man.freebsd.org/cgi/man.cgi?cat) pipe (`|`) with [`awk`](https://man.freebsd.org/cgi/man.cgi?awk) in the `monitor/reports/daily_summary.txt` file with:
-```shell
+```bash
 cat monitor/processed/alerts.sorted | awk '{
     # Increase total alert counter for every line read
     count++; 
@@ -149,26 +149,26 @@ END {
 
 ## IV. Process Management
 1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) 2) via a while loop in the `monitor/raw/timestamps.log` file with:
-```shell
+```bash
 (while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
 ```
 2. Identification of the process' ID (PID) that runs in the background (`&`), using [`ps`](https://man.freebsd.org/cgi/man.cgi?ps) for viewing processes (with the "every" flag `-e`, to show every system process (user-independent) and with the "full format" flag `-f`, to show additional information for every process)) and [`grep`](https://man.freebsd.org/cgi/man.cgi?grep) for filtering with:
-```shell
+```bash
 ps -ef | grep sleep
 ```
 ![IV-2](screenshots/IV-2.png)
 3. Use of [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) to the process whose `PID = 931`, to change the process' priority (niceness) to 10 (lowest process) (sudo privileges required) with:
-```shell
+```bash
 sudo renice -n 10 -p 931
 ```
 ![IV-3](screenshots/IV-3.png)
 4. Process termination with `-TERM` (`SIGTERM`) [signal](https://man.freebsd.org/cgi/man.cgi?query=signal) via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill) to the process whose `PID = 931` with:
-```shell
+```bash
 kill -TERM 931
 ```
 ![IV-4](screenshots/IV-4.png)
 5. The process was found running with `PID = 931`. Initially, its priority was reduced with [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) and then the process was permanently terminated via [`kill`](https://man.freebsd.org/cgi/man.cgi?kill). The `monitor/raw/timestamps.log` file confirms that logging stopped after the process was terminated.
-```shell
+```bash
 cat monitor/raw/timestamps.log
 ```
 ![IV-5](screenshots/IV-5.png)
@@ -273,7 +273,7 @@ if (sumln == 0) {
 ![V-5c](screenshots/V-5c.png)
 
 Finally, with the use of [`gcc`](https://gcc.gnu.org/) and the output flag `-o`, we compile `analyze.c` into the executable `analyze_log` with:
-```shell
+```bash
 gcc analyze.c -o analyze_log
 ```
 ![V](screenshots/V.png)
@@ -284,20 +284,20 @@ gcc analyze.c -o analyze_log
 
 ## VI. Shell Script that automates the entire system
 1. Pass a logs' directory as an argument:
-```shell
+```bash
 # Assign first argument to variable
 LOG_D=$1
 ```
 2. Check if an argument was passed (positional parameters) by checking if total arguments number `$#` is not equal `-ne` to `1`. If `true`, then print an [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
-```shell
+```bash
 # Check if more than one argument is being passed
 if [ "$#" -ne 1 ]; then
     echo -e "${YELLOW}USAGE: $0 /path/to/logs/${NC}"
     exit 1
 fi
 ```
-3. Check if the passed `LOG_D` argument is NOT `!` a directory `-d` (therefore, checking if it also exists) and if `true` then [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
-```shell
+3. Check if the passed `$LOG_D` argument is NOT `!` a directory `-d` (therefore, checking if it also exists) and if `true` then [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
+```bash
 # Check if path exists & is NOT a directory
 if [ ! -d "$LOG_D" ]; then
     echo -e "${RED}ERROR: Directory '$LOG_D' does not exist.${NC}"
@@ -305,12 +305,12 @@ if [ ! -d "$LOG_D" ]; then
 fi
 ```
 4. Display with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the name of the script `$0` and the total number of arguments `$#`:
-```shell
+```bash
 # Script info
 echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}"
 ```
-5. Check if the executable exists and is executable with `-x`, then call the `ANALYZER_EXEC="./analyze_log"` program for each file in the directory as a `file` argument. Else, if the executable is missing, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
-```shell
+5. Check if the executable exists and is executable with `-x`, then call the `$ANALYZER_EXEC="./analyze_log"` program for each file in the directory as a `$file` argument. Else, if the executable is missing, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
+```bash
 ANALYZER_EXEC="./analyze_log"
 
         # Check if executable exists and is executable
@@ -323,34 +323,34 @@ ANALYZER_EXEC="./analyze_log"
             exit 1
         fi
 ```
-6. Define a report file variable `RPT_F` holding the string value of its path `monitor/reports/full_report.txt`.
-```shell
+6. Define a report file variable `$RPT_F` holding the string value of its path `monitor/reports/full_report.txt`.
+```bash
 # Report file path
 RPT_F="monitor/reports/full_report.txt"
 ```
 Then, initialize/overwrite (`>`) the file with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing a header.
-```shell
+```bash
 # Initialize (overwrite) report file
 echo "----- SYSTEM MONITOR FULL REPORT -----" > "$RPT_F"
 ```
-After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `RPT_F`.
-```shell
+After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `$RPT_F`.
+```bash
 echo "Run @ $(date)" >> "$RPT_F"
 echo "--------------------------------------" >> "$RPT_F"
 ```
-Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `filename` of the `file` and append (`>>`) it to the report file `RPT_F`.
-```shell
+Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `$filename` of the `$file` and append (`>>`) it to the report file `$RPT_F`.
+```bash
 # Append separator and file header to report
 echo "" >> "$RPT_F"
 echo "=== $CATEGORY: $filename ===" >> "$RPT_F"
 ```
-And finally, run the `ANALYZER_EXEC="./analyze_log"` executable with the `file` argument and append (`>>`) its output ([`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout)) to the report file `RPT_F`.
-```shell
+And finally, run the `$ANALYZER_EXEC="./analyze_log"` executable with the `$file` argument and append (`>>`) its output ([`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout)) to the report file `$RPT_F`.
+```bash
 # Run executable w/ the file as argument & append its output to report file
 "$ANALYZER_EXEC" "$file" >> "$RPT_F" 
 ```
-However, if the `ANALYZER_EXEC="./analyze_log"` executable's `EXIT_CODE` is not equal `-ne` to `0` then we append (`>>`) each case's error to the report file `RPT_F`:
-```shell
+However, if the `$ANALYZER_EXEC="./analyze_log"` executable's `$EXIT_CODE` is not equal `-ne` to `0` then we append (`>>`) each case's error to the report file `$RPT_F`:
+```bash
 # Store exit code
 EXIT_CODE=$?
 
@@ -359,22 +359,22 @@ if [ $EXIT_CODE -ne 0 ]; then
     # Exit code cases
 fi
 ```
-- If `EXIT_CODE` is equal `-eq` to 1 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` failed to open.
-```shell
+- If `$EXIT_CODE` is equal `-eq` to 1 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `$RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `$file` failed to open.
+```bash
 # Exit code 1 -> Error opening
 if [ $EXIT_CODE -eq 1 ]; then
     echo "   [X] ERROR: Cannot open file." >> "$RPT_F"
     echo -e "${RED}   -> Cannot open file (Exit code 1)${NC}"
 ```
-- If `EXIT_CODE` is equal `-eq` to 2 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` is empty.
-```shell
+- If `$EXIT_CODE` is equal `-eq` to 2 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `$RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `$file` is empty.
+```bash
 # Exit code 2 -> Empty file
 elif [ $EXIT_CODE -eq 2 ]; then
       echo "   [!] NOTE: File is empty." >> "$RPT_F"
       echo -e "${YELLOW}   -> File was empty (Exit code 2)${NC}"
 ```
-- Else, append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `file` had an unknown exit code.
-```shell
+- Else, append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `$RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `$file` had an unknown exit code.
+```bash
 # Unknown exit code
 else
       echo "   [X] ERROR: Analysis failed." >> "$RPT_F"
@@ -384,19 +384,19 @@ fi
 
 A full report will be available in `monitor/reports/full_report.txt`.
 
-*Note: The `ANALYZER_EXEC="./analyze_log"` executable's errors from [`fprint()`](https://man.freebsd.org/cgi/man.cgi?fprintf) and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) aren't being appended (`>>`) to the report file `RPT_F`, because only [`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout) is being appended (`>>`).*
+*Note: The `$ANALYZER_EXEC="./analyze_log"` executable's errors from [`fprint()`](https://man.freebsd.org/cgi/man.cgi?fprintf) and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) aren't being appended (`>>`) to the report file `$RPT_F`, because only [`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout) is being appended (`>>`).*
 
 7. Usage of:
-- [`for`](https://man.freebsd.org/cgi/man.cgi?for) (loop) every `file` in the `LOG_D` directory [`find()`](https://man.freebsd.org/cgi/man.cgi?find) all files that their `-name` contains "`.log`":
-```shell
+- [`for`](https://man.freebsd.org/cgi/man.cgi?for) (loop) every `$file` in the `$LOG_D` directory [`find()`](https://man.freebsd.org/cgi/man.cgi?find) all files that their `-name` contains "`.log`":
+```bash
 # Use 'find' to get all .log files and loop through them one by one
 for file in $(find "$LOG_D" -name "*.log"); do
   # Categorization and executable
 done
 ```
-- Defining a `filename` variable holding just the [`basename`](https://man.freebsd.org/cgi/man.cgi?basename) of the `file` value (for ease) and then using [`case`](https://man.freebsd.org/cgi/man.cgi?case) (for categorization) to assign a string `CATEGORY` and a string `COLOR` (only used for [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing) depending on the `filename`.
-If `filename="system.log"` then `CATEGORY="[SYSTEM EVENT]"`, if `filename="network.log"` then `CATEGORY="[NETWORK TRAFFIC]"`, `filename="security.log"` then `CATEGORY="[SECURITY ALERT]"`, else `filename="*.log"` then `CATEGORY="[UNKNOWN LOG TYPE]"`:
-```shell
+- Defining a `$filename` variable holding just the [`basename`](https://man.freebsd.org/cgi/man.cgi?basename) of the `$file` value (for ease) and then using [`case`](https://man.freebsd.org/cgi/man.cgi?case) (for categorization) to assign a string `$CATEGORY` and a string `$COLOR` (only used for [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing) depending on the `$filename`.
+If `$filename="system.log"` then `$CATEGORY="[SYSTEM EVENT]"`, if `$filename="network.log"` then `$CATEGORY="[NETWORK TRAFFIC]"`, `$filename="security.log"` then `$CATEGORY="[SECURITY ALERT]"`, else `$filename="*.log"` then `$CATEGORY="[UNKNOWN LOG TYPE]"`:
+```bash
 # Extract filename from full path
 filename=$(basename "$file")
 
@@ -421,7 +421,7 @@ case "$filename" in
 esac
 ```
 - `while` loop for iterative execution that when `true` (always `true` until interrupted with the "signal interrupted" `SIGINT` signal (^C)) it executes the script's main code (with [`do`](https://man.freebsd.org/cgi/man.cgi?do)) and after it's finished it waits for `60` seconds to run again ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) `60`):
-```shell
+```bash
 # Start infinite loop (iterative execution)
 while true; do
     # Main script code
@@ -430,4 +430,24 @@ while true; do
 done
 ```
 
-*Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>.*
+- Define `$OLD_IFS` variable to save the current IFS (Internal Field Separator):
+```bash
+# Save current IFS for later restoration
+OLD_IFS=$IFS
+```
+Then set `$IFS` to "new line" `'\n'`, so that files with spaces in their `$filename` aren't divided to seperate files when passed to [`find()`](https://man.freebsd.org/cgi/man.cgi?find). (For example, a file named `"system alerts.log"` with the `$OLD_IFS` would be divided to two files: `"system"` and `"alerts.log"`. With `IFS=$'\n'`, `"system alerts.log"` would be passed to [`find()`](https://man.freebsd.org/cgi/man.cgi?find).):
+```bash
+# Set IFS to "new line" for filenames w/ spaces to be handled correctly
+IFS=$'\n'
+```
+Finally, after the [`for`](https://man.freebsd.org/cgi/man.cgi?for) loop is [`done`](https://man.freebsd.org/cgi/man.cgi?done) restore the `IFS`'s original value by re-assigning its original value (`$OLD_IFS`):
+```bash
+# Restore original IFS
+IFS=$OLD_IFS
+```
+
+*Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>. Only [`bash`](https://man.freebsd.org/cgi/man.cgi?bash) recognizes that flag, [`sh`](https://man.freebsd.org/cgi/man.cgi?sh) acts as if it's part of the output.*
+
+---
+
+## VII. Threads for parallel log analysis
