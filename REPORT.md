@@ -76,11 +76,11 @@ echo "2025-10-26 18:21:05 freebsd-srv kernel: pid 4321 (apache24), jid 0, uid 0:
 ```
 ![I-3](screenshots/I-3.png)
 
-4. Display a detailed list of each line with [ls](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag `-l`:
+4. Display a detailed list of each line with [`ls`](https://man.freebsd.org/cgi/man.cgi?ls) (standing for "list") and the "line" flag `-l`:
 ```bash
 ls -l monitor/raw/
 ```
-and use [wc](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag `-l` to count total lines in the 3 `.log` files:
+and use [`wc`](https://man.freebsd.org/cgi/man.cgi?wc) (standing for "word count") with the "line" flag `-l` to count total lines in the 3 `.log` files:
 ```bash
 wc -l monitor/raw/*.log
 ```
@@ -148,7 +148,7 @@ END {
 ---
 
 ## IV. Process Management
-1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) 2) via a while loop in the `monitor/raw/timestamps.log` file with:
+1. Run background process (`&`) that records timestamps every 2 seconds ([`sleep`](https://man.freebsd.org/cgi/man.cgi?sleep) `2`) via a while loop in the `monitor/raw/timestamps.log` file with:
 ```bash
 (while true; do date >> monitor/raw/timestamps.log; sleep 2; done) &
 ```
@@ -157,7 +157,7 @@ END {
 ps -ef | grep sleep
 ```
 ![IV-2](screenshots/IV-2.png)
-3. Use of [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) to the process whose `PID = 931`, to change the process' priority (niceness) to 10 (lowest process) (sudo privileges required) with:
+3. Use of [`renice`](https://man.freebsd.org/cgi/man.cgi?renice) to the process whose `PID = 931`, to change the process' priority (niceness) to `10` (lowest process) (sudo privileges required) with:
 ```bash
 sudo renice -n 10 -p 931
 ```
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 ![V-1](screenshots/V-1.png)
-2. Attempt to [`open()`](https://man.freebsd.org/cgi/man.cgi?open) the file via system call with the "open for reading only" flag O_RDONLY and returning [`open()`](https://man.freebsd.org/cgi/man.cgi?open)'s value to an integer holding the file descriptor's ID.
+2. Attempt to [`open()`](https://man.freebsd.org/cgi/man.cgi?open) the file via system call with the "open for reading only" flag `O_RDONLY` and returning [`open()`](https://man.freebsd.org/cgi/man.cgi?open)'s value to an integer holding the file descriptor's ID.
 ```c
 // Open file using system call (with reading only flag)
 int fd = open(argv[1], O_RDONLY);   // File descriptor
