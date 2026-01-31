@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         return 1;   // Error converting -> exit code 1
     }
 
-    char *ln = NULL;    // Line's text
+    char *ln = NULL;    // Line buffer
     size_t len = 0;     // Buffer allocation size
     ssize_t read;       // Characters read counter
 
