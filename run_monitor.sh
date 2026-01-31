@@ -5,11 +5,14 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 NC='\033[0m'  # No color (reset)
 
 # Check if more than one argument is being passed
 if [ "$#" -ne 1 ]; then
-    echo -e "${YELLOW}USAGE: $0 /path/to/logs/${NC}"
+    echo -e "${YELLOW}USAGE: bash $0 /path/to/logs/${NC}"
     exit 1
 fi
 
@@ -23,9 +26,9 @@ if [ ! -d "$LOG_D" ]; then
 fi
 
 # Script info
-echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}"
+echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}\n"
 echo "Starting continuous monitoring..."
-echo -e "${RED}(Exit with: ^C)${NC}"
+echo -e "${RED}(Exit with: ^C)${NC}\n"
 
 # Report file path
 RPT_F="monitor/reports/full_report.txt"
@@ -34,12 +37,12 @@ RPT_F="monitor/reports/full_report.txt"
 while true; do
 
     # Print current timestamp
-    echo "[$(date)] Running analysis cycle..."
+    echo -e "[$(date)] - Running analysis cycle...\n"
 
     # Initialize (overwrite) report file
-    echo "----- SYSTEM MONITOR FULL REPORT -----" > "$RPT_F"
+    echo "-------------------------- SYSTEM MONITOR FULL REPORT --------------------------" > "$RPT_F"
     echo "Run @ $(date)" >> "$RPT_F"
-    echo "--------------------------------------" >> "$RPT_F"
+    echo "--------------------------------------------------------------------------------" >> "$RPT_F"
 
     # Save current IFS for later restoration
     OLD_IFS=$IFS
@@ -56,15 +59,19 @@ while true; do
         case "$filename" in
             system.log)
                 CATEGORY="[SYSTEM EVENT]"
-                COLOR=$NC
+                COLOR=$BLUE
                 ;;
             network.log)
                 CATEGORY="[NETWORK TRAFFIC]"
-                COLOR=$NC
+                COLOR=$CYAN
                 ;;
             security.log)
                 CATEGORY="[SECURITY ALERT]"
                 COLOR=$RED
+                ;;
+            timestamps.log)
+                CATEGORY="[TIME TRACKING]"
+                COLOR=$MAGENTA
                 ;;
             *)
                 CATEGORY="[UNKNOWN LOG TYPE]" # Default case
@@ -73,15 +80,15 @@ while true; do
         esac
 
         # Inform user about file's category
-        echo -e "${COLOR}Analyzing: '$CATEGORY' '$filename'...${NC}"
+        echo -e "Analyzing:${COLOR} $CATEGORY: $filename${NC}..."
 
         # Append separator and file header to report
         echo "" >> "$RPT_F"
-        echo "=== $CATEGORY: $filename ===" >> "$RPT_F"
+        echo "===================== $CATEGORY: $filename =====================" >> "$RPT_F"
 
         ANALYZER_EXEC="./analyze_log"
 
-        # Check if executable exists and is executable
+# Check if executable exists and is executable
         if [ -x "$ANALYZER_EXEC" ]; then
             # Run executable w/ the file as argument & append its output to report file
             "$ANALYZER_EXEC" "$file" >> "$RPT_F"
@@ -89,19 +96,17 @@ while true; do
             # Store exit code
             EXIT_CODE=$?
 
-            # Check if executable failed or had warnings
+            # Check execution status
             if [ $EXIT_CODE -ne 0 ]; then
-                # Exit code 1 -> Error opening
+                # Handle Errors/Warnings
                 if [ $EXIT_CODE -eq 1 ]; then
-                    echo "   [X] ERROR: Cannot open file." >> "$RPT_F"
+                    echo "[X] ERROR: Cannot open file." >> "$RPT_F"
                     echo -e "${RED}   -> Cannot open file (Exit code 1)${NC}"
-                # Exit code 2 -> Empty file
                 elif [ $EXIT_CODE -eq 2 ]; then
-                    echo "   [!] NOTE: File is empty." >> "$RPT_F"
+                    echo "[!] NOTE: File is empty." >> "$RPT_F"
                     echo -e "${YELLOW}   -> File was empty (Exit code 2)${NC}"
-                # Unknown exit code
                 else
-                    echo "   [X] ERROR: Analysis failed." >> "$RPT_F"
+                    echo "[X] ERROR: Analysis failed." >> "$RPT_F"
                     echo -e "${RED}   -> Analysis failed (Unknown exit code $EXIT_CODE)${NC}"
                 fi
             fi
@@ -110,13 +115,15 @@ while true; do
             echo -e "${RED}ERROR: '$ANALYZER_EXEC' not found!${NC}"
             exit 1
         fi
+        # Success Message (Exit Code 0)
+        echo -e "${GREEN}   -> Analyzed successfully.${NC}"
     done
 
     # Restore original IFS
     IFS=$OLD_IFS
 
     # Inform user about report status
-    echo -e "${GREEN}Report updated.${YELLOW} Waiting 10 seconds...${NC}"
+    echo -e "\n${GREEN}Report updated.${YELLOW} Waiting 60 seconds...${NC}\n"
 
     # Pause script for 60" before starting next loop
     sleep 60

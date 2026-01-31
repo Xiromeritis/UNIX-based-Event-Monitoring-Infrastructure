@@ -292,10 +292,11 @@ LOG_D=$1
 ```bash
 # Check if more than one argument is being passed
 if [ "$#" -ne 1 ]; then
-    echo -e "${YELLOW}USAGE: $0 /path/to/logs/${NC}"
+    echo -e "${YELLOW}USAGE: bash $0 /path/to/logs/${NC}"
     exit 1
 fi
 ```
+![VI-2](screenshots/VI-2.png)
 3. Check if the passed `$LOG_D` argument is NOT `!` a directory `-d` (therefore, checking if it also exists) and if `true` then [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
 ```bash
 # Check if path exists & is NOT a directory
@@ -304,11 +305,16 @@ if [ ! -d "$LOG_D" ]; then
     exit 1
 fi
 ```
-4. Display with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the name of the script `$0` and the total number of arguments `$#`:
+![VI-3a](screenshots/VI-3a.png)
+![VI-3b](screenshots/VI-3b.png)
+4. Display with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the name of the script `$0` and the total number of arguments `$#` and inform user about abortion signal ("signal interrupted" `SIGINT` signal (^C)):
 ```bash
 # Script info
-echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}"
+echo -e "${GREEN}SCRIPT: $0 running with $# argument${NC}\n"
+echo "Starting continuous monitoring..."
+echo -e "${RED}(Exit with: ^C)${NC}\n"
 ```
+![VI-4](screenshots/VI-4.png)
 5. Check if the executable exists and is executable with `-x`, then call the `$ANALYZER_EXEC="./analyze_log"` program for each file in the directory as a `$file` argument. Else, if the executable is missing, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) an error message and [`exit`](https://man.freebsd.org/cgi/man.cgi?exit) with exit code `1`.
 ```bash
 ANALYZER_EXEC="./analyze_log"
@@ -317,12 +323,14 @@ ANALYZER_EXEC="./analyze_log"
         if [ -x "$ANALYZER_EXEC" ]; then
             # Run executable w/ the file as argument & append its output to report file
             "$ANALYZER_EXEC" "$file" >> "$RPT_F"
+            # Exit code cases
         else
             # Exit if executable missing
             echo -e "${RED}ERROR: '$ANALYZER_EXEC' not found!${NC}"
             exit 1
         fi
 ```
+![VI-5](screenshots/VI-5.png)
 6. Define a report file variable `$RPT_F` holding the string value of its path `monitor/reports/full_report.txt`.
 ```bash
 # Report file path
@@ -331,18 +339,18 @@ RPT_F="monitor/reports/full_report.txt"
 Then, initialize/overwrite (`>`) the file with [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing a header.
 ```bash
 # Initialize (overwrite) report file
-echo "----- SYSTEM MONITOR FULL REPORT -----" > "$RPT_F"
+echo "-------------------------- SYSTEM MONITOR FULL REPORT --------------------------" > "$RPT_F"
 ```
 After that, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `$(date)` when the script is run and append (`>>`) it to the report file `$RPT_F`.
 ```bash
 echo "Run @ $(date)" >> "$RPT_F"
-echo "--------------------------------------" >> "$RPT_F"
+echo "--------------------------------------------------------------------------------" >> "$RPT_F"
 ```
 Then again, [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) the `CATEGORY` and the `$filename` of the `$file` and append (`>>`) it to the report file `$RPT_F`.
 ```bash
 # Append separator and file header to report
 echo "" >> "$RPT_F"
-echo "=== $CATEGORY: $filename ===" >> "$RPT_F"
+echo "===================== $CATEGORY: $filename =====================" >> "$RPT_F"
 ```
 And finally, run the `$ANALYZER_EXEC="./analyze_log"` executable with the `$file` argument and append (`>>`) its output ([`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout)) to the report file `$RPT_F`.
 ```bash
@@ -354,9 +362,12 @@ However, if the `$ANALYZER_EXEC="./analyze_log"` executable's `$EXIT_CODE` is no
 # Store exit code
 EXIT_CODE=$?
 
-# Check if executable failed or had warnings
+# Check execution status
 if [ $EXIT_CODE -ne 0 ]; then
     # Exit code cases
+else
+    # Success Message (Exit Code 0)
+    echo -e "${GREEN}   -> Analyzed successfully.${NC}"
 fi
 ```
 - If `$EXIT_CODE` is equal `-eq` to 1 then append (`>>`) the [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)'s output to the report file `$RPT_F` and [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) that the `$file` failed to open.
@@ -386,6 +397,8 @@ A full report will be available in `monitor/reports/full_report.txt`.
 
 *Note: The `$ANALYZER_EXEC="./analyze_log"` executable's errors from [`fprint()`](https://man.freebsd.org/cgi/man.cgi?fprintf) and [`perror()`](https://man.freebsd.org/cgi/man.cgi?perror) aren't being appended (`>>`) to the report file `$RPT_F`, because only [`stdout`](https://man.freebsd.org/cgi/man.cgi?stdout) is being appended (`>>`).*
 
+![VI-6a](screenshots/VI-6a.png)
+![VI-6b](screenshots/VI-6b.png)
 7. Usage of:
 - [`for`](https://man.freebsd.org/cgi/man.cgi?for) (loop) every `$file` in the `$LOG_D` directory [`find()`](https://man.freebsd.org/cgi/man.cgi?find) all files that their `-name` contains "`.log`":
 ```bash
@@ -395,7 +408,7 @@ for file in $(find "$LOG_D" -name "*.log"); do
 done
 ```
 - Defining a `$filename` variable holding just the [`basename`](https://man.freebsd.org/cgi/man.cgi?basename) of the `$file` value (for ease) and then using [`case`](https://man.freebsd.org/cgi/man.cgi?case) (for categorization) to assign a string `$CATEGORY` and a string `$COLOR` (only used for [`echo`](https://man.freebsd.org/cgi/man.cgi?echo)-ing) depending on the `$filename`.
-If `$filename="system.log"` then `$CATEGORY="[SYSTEM EVENT]"`, if `$filename="network.log"` then `$CATEGORY="[NETWORK TRAFFIC]"`, `$filename="security.log"` then `$CATEGORY="[SECURITY ALERT]"`, else `$filename="*.log"` then `$CATEGORY="[UNKNOWN LOG TYPE]"`:
+If `$filename="system.log"` then `$CATEGORY="[SYSTEM EVENT]"`, if `$filename="network.log"` then `$CATEGORY="[NETWORK TRAFFIC]"`, if `$filename="security.log"` then `$CATEGORY="[SECURITY ALERT]"`, if `$filename="timestamps.log"` then `$CATEGORY="[TIME TRACKING]"`, else `$filename="*.log"` then `$CATEGORY="[UNKNOWN LOG TYPE]"`:
 ```bash
 # Extract filename from full path
 filename=$(basename "$file")
@@ -404,15 +417,19 @@ filename=$(basename "$file")
 case "$filename" in
     system.log)
         CATEGORY="[SYSTEM EVENT]"
-        COLOR=$NC
+        COLOR=$BLUE
         ;;
     network.log)
         CATEGORY="[NETWORK TRAFFIC]"
-        COLOR=$NC
+        COLOR=$CYAN
         ;;
     security.log)
         CATEGORY="[SECURITY ALERT]"
         COLOR=$RED
+        ;;
+    timestamps.log)
+        CATEGORY="[TIME TRACKING]"
+        COLOR=$MAGENTA
         ;;
     *)
         CATEGORY="[UNKNOWN LOG TYPE]" # Default case
@@ -446,7 +463,7 @@ Finally, after the [`for`](https://man.freebsd.org/cgi/man.cgi?for) loop is [`do
 IFS=$OLD_IFS
 ```
 
-*Note: The enable color `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>. Only [`bash`](https://man.freebsd.org/cgi/man.cgi?bash) recognizes that flag, [`sh`](https://man.freebsd.org/cgi/man.cgi?sh) acts as if it's part of the output.*
+*Note: The enable escape characters `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>. Only [`bash`](https://man.freebsd.org/cgi/man.cgi?bash) recognizes that flag, [`sh`](https://man.freebsd.org/cgi/man.cgi?sh) acts as if it's part of the output.*
 
 ---
 
