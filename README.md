@@ -244,3 +244,8 @@ File: monitor/raw/timestamps.log     | Lines:  14 | Errors:   0
                         TOTAL LINES:  29
                         TOTAL ERRORS: 1
 ```
+
+---
+
+## License
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
