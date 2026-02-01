@@ -1,7 +1,6 @@
 # Ignore compiled executables
 analyze_log
 parallel_analyze_logs
-parallel_analyze
 *.o
 
 # Ignore generated reports and data
