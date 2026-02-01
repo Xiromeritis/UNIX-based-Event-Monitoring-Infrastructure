@@ -1,0 +1,30 @@
+# Workflow name displayed in the GitHub Actions tab
+name: C Build Check
+
+# Trigger workflow on every push/pull request
+on: [push, pull_request]
+
+jobs:
+  build:
+    # Run on the latest available Ubuntu Virtual Machine
+    runs-on: ubuntu-latest
+
+    steps:
+    # Check out (download) the repository code
+    - uses: actions/checkout@v3
+    
+    # Update package lists and install GCC compiler & Make
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install -y gcc make
+
+    # Compile the single-file analyzer source code
+    - name: Compile Analyzer
+      run: gcc analyze.c -o analyze_log
+
+    # Compile the parallel analyzer (links with pthread library)
+    - name: Compile Parallel Analyzer
+      run: gcc -pthread parallel_analyze.c -o parallel_analyze_logs
+
+    # Check bash script for syntax errors (dry-run)
+    - name: Check Script Syntax
+      run: bash -n run_monitor.sh
