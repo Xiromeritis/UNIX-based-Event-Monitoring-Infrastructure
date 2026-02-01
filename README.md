@@ -1,5 +1,7 @@
 # UNIX-based Event Monitoring Infrastructure
 
+![Build Status](https://github.com/Xiromeritis/UNIX-based-Event-Monitoring-Infrastructure/actions/workflows/c-build.yml/badge.svg) ![License](https://img.shields.io/badge/license-MIT-green)
+
 **Operating Systems University Semester Lab Work**
 
 *Department of Informatics & Telematics,*
@@ -30,7 +32,7 @@ To build and run this project, a UNIX-based environment is required. The key pre
 
 - [Bash Shell](https://www.gnu.org/software/bash/): Necessary for executing the automation scripts (`run_monitor.sh`).
 
-- [GNU Coreutils](https://www.gnu.org/software/coreutils/): Standard command-line utilities (such as [`grep`](https://man.freebsd.org/cgi/man.cgi?greo), [`awk`](https://man.freebsd.org/cgi/man.cgi?awk), [`find`](https://man.freebsd.org/cgi/man.cgi?find)) used for log management and filtering.
+- [GNU Coreutils](https://www.gnu.org/software/coreutils/): Standard command-line utilities (such as [`grep`](https://man.freebsd.org/cgi/man.cgi?grep), [`awk`](https://man.freebsd.org/cgi/man.cgi?awk), [`find`](https://man.freebsd.org/cgi/man.cgi?find)) used for log management and filtering.
 
 - [Git](https://git-scm.com/): Used for version control.
 
