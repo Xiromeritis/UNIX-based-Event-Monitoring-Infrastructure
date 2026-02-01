@@ -36,7 +36,7 @@ void *analyze_file_thread(void *arg) {
         pthread_exit(NULL); // Terminate this thread only
     }
 
-    char *ln = NULL;  // Line buffer
+    char *ln = NULL;	// Line buffer
     size_t len = 0;     // Buffer size
     ssize_t read;       // Characters read
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
         // If thread finished successfully, collect data
         if (thread_data[i].success) {
             // Print individual file statistics
-            printf("File: %-25s | Lines: %3zu | Errors: %s%3zu%s\n",
+            printf("File: %-30s | Lines: %3zu | Errors: %s%3zu%s\n",
                    thread_data[i].filename,
                    thread_data[i].lines,
                    (thread_data[i].errors > 0 ? RED : GREEN), // Red if errors exist, else Green
