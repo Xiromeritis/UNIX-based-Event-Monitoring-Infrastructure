@@ -1,0 +1,17 @@
+# Ignore compiled executables
+analyze_log
+parallel_analyze_logs
+parallel_analyze
+*.o
+
+# Ignore generated reports and data
+monitor/reports/*
+monitor/processed/*
+monitor/raw/timestamps.log
+
+# Keep the folder structure (don't delete the folders themselves)
+!monitor/reports/.gitkeep
+!monitor/processed/.gitkeep
+
+# System files
+.DS_Store
