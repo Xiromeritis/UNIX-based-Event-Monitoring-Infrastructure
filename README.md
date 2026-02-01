@@ -1,16 +1,16 @@
 # UNIX-based Event Monitoring Infrastructure
 
+**Operating Systems University Semester Lab Work**
+
+*Department of Informatics & Telematics,*
+
+*Harokopio University of Athens*
+
 ---
 
 # Description
 
 A robust system monitoring tool designed to analyze `.log` files, filter critical events, and generate comprehensive reports. It utilizes low-level C programming for performance and bash scripting for automation.
-
-*Operating Systems University Semester Lab Work*
-
-*Department of Informatics & Telematics,*
-
-*Harokopio University of Athens*
 
 ---
 
