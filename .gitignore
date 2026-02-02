@@ -1,6 +1,21 @@
+# CMake artifacts
+cmake-build-debug/
+cmake-build-release/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cbp
+
+# IDE Settings
+.idea/
+.vscode/
+
 # Ignore compiled executables
 analyze_log
 parallel_analyze_logs
+*.exe
+*.out
 *.o
 
 # Ignore generated reports and data
@@ -14,3 +29,4 @@ monitor/raw/timestamps.log
 
 # System files
 .DS_Store
+Thumbs.db
