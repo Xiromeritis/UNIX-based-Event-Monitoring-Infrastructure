@@ -10,7 +10,7 @@
 #define YELLOW  "\033[1;33m"
 #define NC   "\033[0m"   // No color (reset)
 
-int main(int argc, char *argv[]) {
+int main(const int argc, char *argv[]) {
     // Check if filename argument is provided
     if (argc != 2) {
         fprintf(stderr, "%sUsage: %s <filename>%s\n", YELLOW, argv[0], NC);
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Open file using system call (w/ reading only flag)
-    int fd = open(argv[1], O_RDONLY);   // File descriptor
+    const int fd = open(argv[1], O_RDONLY);   // File descriptor
 
     // Check for open() error
     if (fd == -1) {

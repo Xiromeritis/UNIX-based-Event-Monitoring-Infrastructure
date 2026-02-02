@@ -37,10 +37,9 @@ void *analyze_file_thread(void *arg) {
 
     char *ln = NULL;	// Line buffer
     size_t len = 0;     // Buffer size
-    ssize_t read;       // Characters read
 
     // Read file line-by-line
-    while ((read = getline(&ln, &len, fp)) != -1) {
+    while (getline(&ln, &len, fp) != -1) {
         stats->lines++; // Increment line counter
 
         // Check if line contains "ERROR"
@@ -57,14 +56,14 @@ void *analyze_file_thread(void *arg) {
     pthread_exit(NULL); // Exit thread
 }
 
-int main(int argc, char *argv[]) {
+int main(const int argc, char *argv[]) {
     // Check if at least one file argument is provided
     if (argc < 2) {
         fprintf(stderr, "%sUsage: %s <file1> <file2> ...%s\n", YELLOW, argv[0], NC);
         return 1;   // Exit code 1
     }
 
-    int filesno = argc - 1;   // Number of files to process
+    const int filesno = argc - 1;   // Number of files to process
 
     // Arrays to store thread IDs and their data
     pthread_t threads[filesno];
