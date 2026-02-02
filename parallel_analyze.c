@@ -19,7 +19,7 @@ typedef struct {
 
 // Thread worker function
 void *analyze_file_thread(void *arg) {
-    // Cast generic void pointer back to FileStats struct
+    // Cast a generic void pointer back to FileStats struct
     FileStats *stats = (FileStats *)arg;
 
     // Initialize counters
@@ -27,7 +27,7 @@ void *analyze_file_thread(void *arg) {
     stats->errors = 0;
     stats->success = 0;
 
-    // Open file for reading (standard I/O)
+    // Open a file for reading (standard I/O)
     FILE *fp = fopen(stats->filename, "r");
     if (fp == NULL) {
         // Print error to stderr() without exiting parallel_analyze
@@ -38,17 +38,17 @@ void *analyze_file_thread(void *arg) {
     char *ln = NULL;	// Line buffer
     size_t len = 0;     // Buffer size
 
-    // Read file line-by-line
+    // Read the file line-by-line
     while (getline(&ln, &len, fp) != -1) {
         stats->lines++; // Increment line counter
 
-        // Check if line contains "ERROR"
+        // Check if a line contains "ERROR"
         if (strstr(ln, "ERROR") != NULL) {
             stats->errors++; // Increment error counter
         }
     }
 
-    // Cleanup memory and close file
+    // Clean up memory and close a file
     free(ln);
     fclose(fp);
 
@@ -71,7 +71,7 @@ int main(const int argc, char *argv[]) {
 
     printf("%sStarting parallel analysis on %d files...%s\n\n", GREEN, filesno, NC);
 
-    // 1. Thread Creation Loop
+    // 1. Thread creation loop
     for (int i = 0; i < filesno; i++) {
         // Assign filename to the struct
         thread_data[i].filename = argv[i + 1];
@@ -83,7 +83,7 @@ int main(const int argc, char *argv[]) {
         }
     }
 
-    // 2. Thread Join Loop (Wait for completion)
+    // Thread join loop (wait for completion)
     // Use size_t for global counters as well
     size_t total_lines = 0;
     size_t total_errors = 0;
@@ -92,7 +92,7 @@ int main(const int argc, char *argv[]) {
         // Block until thread i finishes execution
         pthread_join(threads[i], NULL);
 
-        // If thread finished successfully, collect data
+        // If the thread finished successfully, collect data
         if (thread_data[i].success) {
             // Print individual file statistics
             printf("File: %-30s | Lines: %3zu | Errors: %s%3zu%s\n",
@@ -108,7 +108,7 @@ int main(const int argc, char *argv[]) {
         }
     }
 
-    // 3. Print Final Summary Report
+    // Print final summary report
     printf("\t\t\tTOTAL LINES:  %zu\n", total_lines);
     printf("\t\t\tTOTAL ERRORS: %s%zu%s\n", (total_errors > 0 ? RED : GREEN), total_errors, NC);
 

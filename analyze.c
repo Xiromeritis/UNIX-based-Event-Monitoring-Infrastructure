@@ -11,13 +11,13 @@
 #define NC   "\033[0m"   // No color (reset)
 
 int main(const int argc, char *argv[]) {
-    // Check if filename argument is provided
+    // Check if the filename argument is provided
     if (argc != 2) {
         fprintf(stderr, "%sUsage: %s <filename>%s\n", YELLOW, argv[0], NC);
         return 1;   // Error opening -> exit code 1
     }
 
-    // Open file using system call (w/ reading only flag)
+    // Open a file using system call (w/ "reading-only" flag)
     const int fd = open(argv[1], O_RDONLY);   // File descriptor
 
     // Check for open() error
@@ -26,7 +26,7 @@ int main(const int argc, char *argv[]) {
         return 1;   // Error opening -> exit code 1
     }
 
-    // Convert file descriptor to stream for getline() w/ read permission
+    // Convert the file descriptor to stream for getline() w/ read permission
     FILE *fp = fdopen(fd, "r");     // File pointer
     if (fp == NULL) {
         perror(RED "Error converting file descriptor");
@@ -42,7 +42,7 @@ int main(const int argc, char *argv[]) {
     size_t errln = 0;  // "ERROR"-containing lines counter
     size_t noln = 0;   // Digit-containing lines counter
 
-    // Read file line-by-line
+    // Read the file line-by-line
     while ((read = getline(&ln, &len, fp)) != -1) {
         sumln++;    // Increment line counter
 
