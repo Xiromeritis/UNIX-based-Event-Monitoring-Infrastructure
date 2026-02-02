@@ -3,7 +3,6 @@
 #include <string.h> // strstr() library
 #include <fcntl.h>  // open() & O_RDONLY library
 #include <unistd.h> // close() library
-#include <errno.h>  // errno library
 #include <ctype.h>  // isdigit() library
 
 // Colors

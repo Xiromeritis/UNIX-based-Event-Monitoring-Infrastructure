@@ -2,7 +2,6 @@
 #include <stdlib.h> // free() & exit() library
 #include <string.h> // strstr() library
 #include <pthread.h>// pthread_create() & pthread_join() library
-#include <errno.h>  // errno library
 
 // Color Definitions
 #define RED     "\033[0;31m"
