@@ -227,6 +227,31 @@ Run the automation script by providing the directory containing your logs:
 ```
 This command will analyze all logs in the specified directory and generate a summary report in `monitor/reports/full_report.txt`.
 
+### Example Output
+When running the automation script, you
+
+### Example Output
+When running the automation script, you will see output similar to this:
+```text
+SCRIPT: ./run_monitor.sh running with 1 argument
+
+Starting continuous monitoring...
+(Exit with: ^C)
+
+
+[Day Mon  D HH:MM:SS EET YYYY] - Running analysis cycle...
+
+Analyzing: [NETWORK TRAFFIC]: network.log...
+   -> Analyzed successfully.
+Analyzing: [SECURITY ALERT]: security.log...
+   -> Analyzed successfully.
+Analyzing: [SYSTEM EVENT]: system.log...
+   -> Analyzed successfully.
+
+Report updated. Waiting 60 seconds...
+```
+This will spawn a separate thread for each `.log` file provided and output the statistics directly to the console.
+
 ## Option 2: Parallel Analysis
 To demonstrate the multi-threading capabilities, you can run the parallel analyzer directly:
 ```bash

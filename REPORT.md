@@ -465,6 +465,8 @@ IFS=$OLD_IFS
 
 *Note: The enable escape characters `-e` flag in [`echo`](https://man.freebsd.org/cgi/man.cgi?echo) is used for a <span style="color:red"> *colored output*</span>. Only [`bash`](https://man.freebsd.org/cgi/man.cgi?bash) recognizes that flag, [`sh`](https://man.freebsd.org/cgi/man.cgi?sh) acts as if it's part of the output.*
 
+*Note: In the `run_monitor.sh` script, screenshots are taken without clearing the terminal screen beforehand, so that the input and the output are visible in the same window as the script's execution.*
+
 ---
 
 ## VII. Threads for parallel log analysis
