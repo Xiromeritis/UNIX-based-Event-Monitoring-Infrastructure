@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Dynamic shebang for cross-platform portability
 
+clear
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
