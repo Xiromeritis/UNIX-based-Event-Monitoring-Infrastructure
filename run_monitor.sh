@@ -36,8 +36,9 @@ RPT_F="monitor/reports/full_report.txt"
 # Start infinite loop (iterative execution)
 while true; do
 
-    # Clear terminal
-    clear
+    # \033[6;1H: Move cursor to Line 6, Column 1
+    # \033[J: Clear screen below cursor
+    echo -e "\033[6;1H\033[J"
 
     # Print current timestamp
     echo -e "[$(date)] - Running analysis cycle...\n"
