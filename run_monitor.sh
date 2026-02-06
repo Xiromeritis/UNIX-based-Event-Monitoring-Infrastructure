@@ -36,6 +36,9 @@ RPT_F="monitor/reports/full_report.txt"
 # Start infinite loop (iterative execution)
 while true; do
 
+    # Clear terminal
+    clear
+
     # Print current timestamp
     echo -e "[$(date)] - Running analysis cycle...\n"
 

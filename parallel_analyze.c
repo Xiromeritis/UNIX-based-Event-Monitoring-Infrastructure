@@ -20,7 +20,7 @@ typedef struct {
 // Thread worker function
 void *analyze_file_thread(void *arg) {
     // Cast a generic void pointer back to FileStats struct
-    FileStats *stats = (FileStats *)arg;
+    FileStats *stats = arg;
 
     // Initialize counters
     stats->lines = 0;
@@ -48,9 +48,8 @@ void *analyze_file_thread(void *arg) {
         }
     }
 
-    // Clean up memory and close a file
-    free(ln);
-    fclose(fp);
+    free(ln);   // Cleanup memory
+    fclose(fp); // Close a file
 
     stats->success = 1; // Mark analysis as successful
     pthread_exit(NULL); // Exit thread
@@ -84,9 +83,8 @@ int main(const int argc, char *argv[]) {
     }
 
     // Thread join loop (wait for completion)
-    // Use size_t for global counters as well
-    size_t total_lines = 0;
-    size_t total_errors = 0;
+    size_t lines = 0;
+    size_t errors = 0;
 
     for (int i = 0; i < filesno; i++) {
         // Block until thread i finishes execution
@@ -98,19 +96,19 @@ int main(const int argc, char *argv[]) {
             printf("File: %-30s | Lines: %3zu | Errors: %s%3zu%s\n",
                    thread_data[i].filename,
                    thread_data[i].lines,
-                   (thread_data[i].errors > 0 ? RED : GREEN), // Red if errors exist, else Green
+                   thread_data[i].errors > 0 ? RED : GREEN, // Red if errors exist, else Green
                    thread_data[i].errors,
                    NC);
 
             // Accumulate to global totals
-            total_lines += thread_data[i].lines;
-            total_errors += thread_data[i].errors;
+            lines += thread_data[i].lines;
+            errors += thread_data[i].errors;
         }
     }
 
     // Print final summary report
-    printf("\t\t\tTOTAL LINES:  %zu\n", total_lines);
-    printf("\t\t\tTOTAL ERRORS: %s%zu%s\n", (total_errors > 0 ? RED : GREEN), total_errors, NC);
+    printf("\t\t\tTOTAL LINES:  %zu\n", lines);
+    printf("\t\t\tTOTAL ERRORS: %s%zu%s\n", (errors > 0 ? RED : GREEN), errors, NC);
 
     return 0;   // Success -> exit code 0
 }
