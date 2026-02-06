@@ -472,3 +472,82 @@ IFS=$OLD_IFS
 
 ## VII. Threads for parallel log analysis
 
+1. [`main()`](https://man.freebsd.org/cgi/man.cgi?main) accepts multiple `.log` files as arguments. It calculates the total number of files to process the number of files (`filesno`) and validates input.
+
+```c
+const int filesno = argc - 1; // Number of files to process
+
+// Arrays to store thread IDs and their data
+pthread_t threads[filesno];
+FileStats thread_data[filesno];
+```
+
+2. A [`for`](https://man.freebsd.org/cgi/man.cgi?) loop iterates through the arguments, creating a thread for each file using [`pthread_create()`](https://man.freebsd.org/cgi/man.cgi?pthread_create).
+
+```c
+// Thread creation loop
+for (int i = 0; i < filesno; i++) {
+    // Assign filename to the struct
+    thread_data[i].filename = argv[i + 1];
+    
+    // Create a new thread for each file
+    if (pthread_create(&threads[i], NULL, analyze_file_thread, &thread_data[i]) != 0) {
+        perror(RED "Error creating thread" NC);
+        return 1;   // Error creating thread -> exit code 1
+    }
+}
+```
+Inside the `analyze_file_thread()` function, each thread:
+- attempts to open the file pointer `fp` with [`fopen()`](https://man.freebsd.org/cgi/man.cgi?fopen) via the `FileStats` structure.
+```c
+// Open a file for reading (standard I/O)
+FILE *fp = fopen(stats->filename, "r");
+```
+- reads the file line-by-line using [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) and checks for "ERROR" occurrences using [`strstr()`](https://man.freebsd.org/cgi/man.cgi?strstr), incrementing the line and error counters.
+```c
+// Read the file line-by-line
+while (getline(&ln, &len, fp) != -1) {
+    stats->lines++; // Increment line counter
+
+    // Check if a line contains "ERROR"
+    if (strstr(ln, "ERROR") != NULL) {
+        stats->errors++; // Increment error counter
+    }
+}
+```
+- updates the `FileStats` structure passed by reference (`arg`), storing the final counts and success status directly in memory shared with [`main()`](https://man.freebsd.org/cgi/man.cgi?main), instead of a simple [`return`](https://man.freebsd.org/cgi/man.cgi?return) value.
+```c
+stats->success = 1; // Mark analysis as successful
+return NULL; // Exit thread
+```
+
+3. [`main()`](https://man.freebsd.org/cgi/man.cgi?main) waits for all threads to complete their execution using [`pthread_join()`](https://man.freebsd.org/cgi/man.cgi?pthread_join). This ensures that all files are fully processed before the final report is generated.
+```c
+for (int i = 0; i < filesno; i++) {
+        // Block until thread i finishes execution
+        pthread_join(threads[i], NULL);
+}
+```
+
+4. Finally, the program prints a formatted summary report, displaying individual statistics for each file (lines and errors) and calculates/prints the global totals.
+```c
+    // If the thread finished successfully, collect data
+    if (thread_data[i].success) {
+        // Print file statistics
+        printf("File: %-30s | Lines: %3zu | Errors: %s%3zu%s\n",
+            thread_data[i].filename,
+            thread_data[i].lines,
+            thread_data[i].errors > 0 ? RED : GREEN, // Red if errors exist, else Green
+            thread_data[i].errors,
+            NC);
+
+        // Accumulate to global totals
+        lines += thread_data[i].lines;
+        errors += thread_data[i].errors;
+    }
+// Print final summary report
+printf("\t\t\tTOTAL LINES:  %zu\n", lines);
+printf("\t\t\tTOTAL ERRORS: %s%zu%s\n", (errors > 0 ? RED : GREEN), errors, NC);    
+```
+![VII](screenshots/VII.png)
+
