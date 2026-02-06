@@ -205,7 +205,7 @@ if (fd == -1) {
 4. If the file opens, [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) reads, inside an infinite loop, each of the `fp`'s (file pointer's) line until it returns `-1`, meaning the end of file (`EOF`). The variables that are defined are:
 - total lines read from the use of [`getline()`](https://man.freebsd.org/cgi/man.cgi?getline) counter
 - "ERROR" string-containing lines from the use of [`strstr()`](https://man.freebsd.org/cgi/man.cgi?strstr) counter
-- digit-containing lines from the use of [`isdigit`](https://man.freebsd.org/cgi/man.cgi?isdigit) in a loop counter
+- digit-containing lines from the use of [`isdigit()`](https://man.freebsd.org/cgi/man.cgi?isdigit) in a loop counter
 ```c
 char *ln = NULL;    // Line's text
 size_t len = 0;     // Buffer allocation size
@@ -545,6 +545,7 @@ for (int i = 0; i < filesno; i++) {
         lines += thread_data[i].lines;
         errors += thread_data[i].errors;
     }
+
 // Print final summary report
 printf("\t\t\tTOTAL LINES:  %zu\n", lines);
 printf("\t\t\tTOTAL ERRORS: %s%zu%s\n", (errors > 0 ? RED : GREEN), errors, NC);    
