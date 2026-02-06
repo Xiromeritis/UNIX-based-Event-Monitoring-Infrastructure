@@ -122,7 +122,7 @@ cat monitor/processed/alerts.sorted | awk '{
 } 
 END { 
     # Print final summary
-    print "Total Alerts: " count ", Errors: " error ", Local Network Events: " ip 
+    print "Total Alerts: " count+0 ", Errors: " error+0 ", Local Network Events: " ip+0 
 }'
 ```
 ![III-1](screenshots/III-1.png)
@@ -140,10 +140,11 @@ cat monitor/processed/alerts.sorted | awk '{
 } 
 END { 
     # Print final summary
-    print "Total Alerts: " count ", Errors: " error ", Local Network Events: " ip 
+    print "Total Alerts: " count+0 ", Errors: " error+0 ", Local Network Events: " ip+0 
 }' > monitor/reports/daily_summary.txt
 ```
 ![III-2](screenshots/III-2.png)
+*Note: `+0` is used to prevent null values from being printed as `0`.*
 
 ---
 
