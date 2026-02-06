@@ -211,23 +211,23 @@ char *ln = NULL;    // Line's text
 size_t len = 0;     // Buffer allocation size
 ssize_t read;       // Characters read counter
 
-size_t sumln = 0;  // Lines read counter
-size_t errln = 0;  // "ERROR"-containing lines counter
-size_t noln = 0;   // Digit-containing lines counter
+size_t lines = 0;  // Lines read counter
+size_t errors = 0;  // "ERROR"-containing lines counter
+size_t numlines = 0;   // Digit-containing lines counter
 
 // Read file line-by-line
 while ((read = getline(&ln, &len, fp)) != -1) {
-    sumln++;    // Increment line counter
+    lines++;    // Increment line counter
 
     // Increment "ERROR"-containing line counter
     if (strstr(ln, "ERROR") != NULL) {
-        errln++;
+        errors++;
     }
 
     // Increment digit-containing line counter
     for (int i = 0; i < read; i++) {
         if (isdigit(ln[i])) {
-            noln++;
+            numlines++;
             break;  // Stop checking the line if a number is found
         }
     }
@@ -236,7 +236,7 @@ while ((read = getline(&ln, &len, fp)) != -1) {
 5. If the file is successfully read, [`main()`](https://man.freebsd.org/cgi/man.cgi?main) returns exit code `0` and prints statistics:
 ```c
 // Print statistics
-printf("File: %s | Lines: %zu | Errors: %zu | Numeric Lines: %zu\n", argv[1], sumln, errln, noln);
+printf("File: %s | Lines: %zu | Errors: %zu | Numeric Lines: %zu\n", argv[1], lines, errors, numlines);
 
 return 0;   // Success -> exit code 0
 ```
@@ -266,7 +266,7 @@ if (fp == NULL) {
 and exit code `2` if a file is empty:
 ```c 
 // Empty file -> exit code 2
-if (sumln == 0) {
+if (lines == 0) {
     fprintf(stderr, "%sEmpty file warning: %s%s\n", YELLOW, argv[1], NC);
     return 2;
 }
@@ -471,3 +471,4 @@ IFS=$OLD_IFS
 ---
 
 ## VII. Threads for parallel log analysis
+

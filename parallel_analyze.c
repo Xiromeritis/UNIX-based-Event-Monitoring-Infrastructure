@@ -22,17 +22,17 @@ void *analyze_file_thread(void *arg) {
     // Cast a generic void pointer back to FileStats struct
     FileStats *stats = arg;
 
-    // Initialize counters
-    stats->lines = 0;
-    stats->errors = 0;
-    stats->success = 0;
+    // Counters initialization
+    stats->lines = 0;   // Lines read counter
+    stats->errors = 0;  // "ERROR"-containing lines counter
+    stats->success = 0; // Analysis status
 
     // Open a file for reading (standard I/O)
     FILE *fp = fopen(stats->filename, "r");
     if (fp == NULL) {
         // Print error to stderr() without exiting parallel_analyze
         fprintf(stderr, "%s[Thread Error] Cannot open file: %s%s\n", RED, stats->filename, NC);
-        pthread_exit(NULL); // Terminate this thread only
+        return NULL; // Terminate this thread only
     }
 
     char *ln = NULL;	// Line buffer
@@ -52,14 +52,14 @@ void *analyze_file_thread(void *arg) {
     fclose(fp); // Close a file
 
     stats->success = 1; // Mark analysis as successful
-    pthread_exit(NULL); // Exit thread
+    return NULL; // Exit thread
 }
 
 int main(const int argc, char *argv[]) {
     // Check if at least one file argument is provided
     if (argc < 2) {
         fprintf(stderr, "%sUsage: %s <file1> <file2> ...%s\n", YELLOW, argv[0], NC);
-        return 1;   // Exit code 1
+        return 1;   // Wrong usage -> exit code 1
     }
 
     const int filesno = argc - 1;   // Number of files to process
@@ -70,7 +70,7 @@ int main(const int argc, char *argv[]) {
 
     printf("%sStarting parallel analysis on %d files...%s\n\n", GREEN, filesno, NC);
 
-    // 1. Thread creation loop
+    // Thread creation loop
     for (int i = 0; i < filesno; i++) {
         // Assign filename to the struct
         thread_data[i].filename = argv[i + 1];
@@ -78,13 +78,13 @@ int main(const int argc, char *argv[]) {
         // Create a new thread for each file
         if (pthread_create(&threads[i], NULL, analyze_file_thread, &thread_data[i]) != 0) {
             perror(RED "Error creating thread" NC);
-            return 1;
+            return 1;   // Error creating thread -> exit code 1
         }
     }
 
     // Thread join loop (wait for completion)
-    size_t lines = 0;
-    size_t errors = 0;
+    size_t lines = 0;   // Lines read accumulator
+    size_t errors = 0;  // "ERROR"-containing lines accumulator
 
     for (int i = 0; i < filesno; i++) {
         // Block until thread i finishes execution
@@ -92,7 +92,7 @@ int main(const int argc, char *argv[]) {
 
         // If the thread finished successfully, collect data
         if (thread_data[i].success) {
-            // Print individual file statistics
+            // Print file statistics
             printf("File: %-30s | Lines: %3zu | Errors: %s%3zu%s\n",
                    thread_data[i].filename,
                    thread_data[i].lines,
