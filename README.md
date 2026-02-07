@@ -223,7 +223,7 @@ chmod +x run_monitor.sh
 ## Option 1: Automated Monitoring
 Run the automation script by providing the directory containing your logs:
 ```bash
-./run_monitor.sh monitor/raw/
+bash ./run_monitor.sh monitor/raw/
 ```
 This command will analyze all logs in the specified directory and generate a summary report in `monitor/reports/full_report.txt`.
 

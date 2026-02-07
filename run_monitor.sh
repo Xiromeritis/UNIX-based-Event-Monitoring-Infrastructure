@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Dynamic shebang for cross-platform portability
 
+# Clear input command
 clear
 
 # Colors
