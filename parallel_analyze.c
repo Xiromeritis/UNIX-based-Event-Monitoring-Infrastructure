@@ -57,10 +57,15 @@ void *analyze_file_thread(void *arg) {
 
 int main(const int argc, char *argv[]) {
     // Check if at least one file argument is provided
-    if (argc < 2) {
+    if (argc < 2)
+    {
         fprintf(stderr, "%sUsage: %s <file1> <file2> ...%s\n", YELLOW, argv[0], NC);
         return 1;   // Wrong usage -> exit code 1
     }
+
+    // \033[H: Move cursor top left
+    // \033[J: Clear screen below cursor
+    printf("\033[H\033[J");
 
     const int filesno = argc - 1;   // Number of files to process
 

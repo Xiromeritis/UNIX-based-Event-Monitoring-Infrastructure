@@ -261,14 +261,12 @@ This will spawn a separate thread for each log file provided and output the stat
 ### Example Output
 When running the parallel analyzer, you will see output similar to this:
 ```text
-Starting parallel analysis on 5 files...
+Starting parallel analysis on 3 files...
 
-File: monitor/raw/empty.log          | Lines:   0 | Errors:   0
 File: monitor/raw/network.log        | Lines:   5 | Errors:   1
 File: monitor/raw/security.log       | Lines:   5 | Errors:   0
 File: monitor/raw/system.log         | Lines:   5 | Errors:   0
-File: monitor/raw/timestamps.log     | Lines:  14 | Errors:   0
-                        TOTAL LINES:  29
+                        TOTAL LINES:  15
                         TOTAL ERRORS: 1
 ```
 
